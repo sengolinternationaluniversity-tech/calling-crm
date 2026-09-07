@@ -38,9 +38,9 @@
 <div class="modal-actions"><button type="button" id="cancelModal" class="btn secondary">Cancel</button><button class="btn primary">Save</button></div></form></div><div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const URL='https://mznmrxnxmplszrwjarey.supabase.co';
+const SUPABASE_URL='https://mznmrxnxmplszrwjarey.supabase.co';
 const KEY='sb_publishable_U12mRVuPpXzsiU7uqFSu8A_qQmyZG6a';
-const db=window.supabase.createClient(URL,KEY);
+const db=window.supabase.createClient(SUPABASE_URL,KEY);
 const S={user:null,profile:null,staff:[],page:1,size:50,total:0,search:'',staffId:''};
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 function toast(m){$('#toast').textContent=m;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2500)}
