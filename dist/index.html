@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Calling CRM dashboard for calls, follow-ups and team management" />
+  <title>Calling CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">◆</div><div><strong>Calling CRM</strong><span>Connect · Track · Grow</span></div></div>
+      <nav id="nav">
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span>Dashboard</button>
+        <button class="nav-item" data-page="institutes"><span>▦</span>Institutes</button>
+        <button class="nav-item" data-page="calling"><span>☎</span>Calling</button>
+        <button class="nav-item" data-page="staff"><span>♙</span>Staff</button>
+        <button class="nav-item" data-page="reports"><span>⌁</span>Reports</button>
+        <button class="nav-item" data-page="import"><span>⇧</span>Data Import</button>
+        <button class="nav-item" data-page="settings"><span>⚙</span>Settings</button>
+      </nav>
+      <div class="support"><div class="support-icon">◉</div><div><strong>Need Help?</strong><small>Contact Support</small></div><button id="helpBtn">Get Help</button></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+        <label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search institutes, contacts, or anything..." /></label>
+        <div class="top-actions"><button class="icon-btn" aria-label="Notifications">♧<b>3</b></button><div class="avatar">AP</div><div class="profile"><strong>Admin</strong><span>Super Admin</span></div></div>
+      </header>
+      <section class="content" id="content">
+        <div class="page-heading"><div><h1 id="pageTitle">Dashboard</h1><p id="pageSubtitle">Welcome back! Here’s an overview of your CRM.</p></div><time id="today"></time></div>
+        <div id="dashboardPage" class="page active">
+          <div class="metrics">
+            <article class="metric blue"><div class="metric-icon">▦</div><div><h2 id="instituteCount">1,248</h2><p>Total Institutes</p><small>↑ 12% this month</small></div></article>
+            <article class="metric green"><div class="metric-icon">♟</div><div><h2>20</h2><p>Total Staff</p><small>↑ 5% this month</small></div></article>
+            <article class="metric amber"><div class="metric-icon">☎</div><div><h2>350</h2><p>Pending Calls</p><small>8% need attention</small></div></article>
+            <article class="metric rose"><div class="metric-icon">▣</div><div><h2 id="followupCount">80</h2><p>Follow Ups</p><small>↑ 15% this week</small></div></article>
+          </div>
+          <div class="chart-grid">
+            <article class="card"><div class="card-title"><h3>Call Status Overview</h3><button class="text-btn">This month⌄</button></div><div class="status-chart"><div class="donut"><div><b>350</b><span>Total Calls</span></div></div><div class="legend"><p><i class="dot green-dot"></i><span>Interested</span><b>120 <em>34%</em></b></p><p><i class="dot red-dot"></i><span>Not Interested</span><b>100 <em>29%</em></b></p><p><i class="dot blue-dot"></i><span>Follow Up</span><b>80 <em>23%</em></b></p><p><i class="dot grey-dot"></i><span>Not Reachable</span><b>50 <em>14%</em></b></p></div></div></article>
+            <article class="card"><div class="card-title"><h3>Monthly Activity</h3><div class="mini-legend"><span><i class="blue-dot"></i> Calls</span><span><i class="green-dot"></i> Follow Ups</span><span><i class="orange-dot"></i> New</span></div></div><div class="bar-chart" id="barChart"></div></article>
+          </div>
+          <div class="table-grid">
+            <article class="card"><div class="card-title"><h3>Recent Institutes</h3><button class="text-btn" data-jump="institutes">View All</button></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Institute Name</th><th>Location</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody id="recentBody"></tbody></table></div></article>
+            <article class="card"><div class="card-title"><h3>Upcoming Follow Ups</h3><button class="text-btn" data-jump="calling">View All</button></div><div id="followupList" class="followup-list"></div></article>
+          </div>
+          <div class="quick-actions"><button data-action="add"><span class="qa-icon green">＋</span><b>Add New Institute</b><small>Manually add a new institute</small><em>→</em></button><button data-jump="import"><span class="qa-icon blue">⇧</span><b>Import from Excel</b><small>Upload institute data</small><em>→</em></button><button data-jump="staff"><span class="qa-icon violet">♟</span><b>Manage Staff</b><small>Add or manage team members</small><em>→</em></button><button data-jump="reports"><span class="qa-icon purple">▤</span><b>View Reports</b><small>Analytics and insights</small><em>→</em></button></div>
+        </div>
+        <div id="institutesPage" class="page"><article class="card full"><div class="toolbar"><div><h3>All Institutes</h3><p>Manage leads and institute relationships</p></div><button class="primary" data-action="add">＋ Add Institute</button></div><div class="filters"><input id="tableSearch" placeholder="Search name, city or phone"/><select id="statusFilter"><option value="all">All statuses</option><option>Interested</option><option>Follow Up</option><option>Not Interested</option><option>Not Reachable</option></select></div><div class="table-wrap"><table><thead><tr><th>Institute</th><th>Location</th><th>Contact</th><th>Owner</th><th>Status</th><th>Next Call</th><th>Action</th></tr></thead><tbody id="allInstitutes"></tbody></table></div></article></div>
+        <div id="callingPage" class="page"><div class="split"><article class="card"><h3>Today’s Call Queue</h3><p class="muted">Priority follow-ups for your team</p><div id="callQueue" class="call-queue"></div></article><article class="card call-panel"><div class="call-icon">☎</div><h2>Ready to connect?</h2><p>Select a contact from the queue to start a call and record the outcome.</p><button class="primary" id="startFirstCall">Start next call</button></article></div></div>
+        <div id="staffPage" class="page"><div class="staff-grid" id="staffGrid"></div></div>
+        <div id="reportsPage" class="page"><div class="metrics"><article class="metric blue"><div><h2>68%</h2><p>Contact Rate</p><small>↑ 4.2% vs last month</small></div></article><article class="metric green"><div><h2>34%</h2><p>Interest Rate</p><small>↑ 2.8% vs last month</small></div></article><article class="metric amber"><div><h2>7m 42s</h2><p>Avg. Call Duration</p><small>Healthy engagement</small></div></article><article class="metric rose"><div><h2>92%</h2><p>Follow-up Completion</p><small>18 due this week</small></div></article></div><article class="card full report-card"><h3>Team Performance</h3><div id="performance"></div></article></div>
+        <div id="importPage" class="page"><article class="card import-card"><div class="upload-icon">⇧</div><h2>Import institute data</h2><p>Upload a CSV file with institute name, location, phone, status and owner columns.</p><label class="upload-btn">Choose CSV file<input type="file" id="csvInput" accept=".csv" hidden></label><small id="uploadStatus">Maximum recommended size: 10 MB</small></article></div>
+        <div id="settingsPage" class="page"><article class="card settings-card"><h3>CRM Settings</h3><label>CRM name<input value="Calling CRM"/></label><label>Default country<input value="India"/></label><label>Default follow-up time<select><option>10:00 AM</option><option>11:00 AM</option><option>2:00 PM</option></select></label><label class="toggle-row"><span><b>Email reminders</b><small>Get notified before follow-up calls</small></span><input type="checkbox" checked></label><button class="primary" id="saveSettings">Save Changes</button></article></div>
+      </section>
+      <footer>© 2026 Calling CRM <span>Build relationships. Create opportunities.</span></footer>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="modal"><form class="modal" id="instituteForm"><div class="modal-head"><div><h2>Add New Institute</h2><p>Create a lead for your calling team</p></div><button type="button" class="close" id="closeModal">×</button></div><div class="form-grid"><label>Institute name<input name="name" required placeholder="e.g. Bright Future Academy"></label><label>City<input name="city" required placeholder="e.g. Jaipur"></label><label>Phone number<input name="phone" required inputmode="numeric" placeholder="9876543210"></label><label>Owner<select name="owner"><option>Rahul</option><option>Priya</option><option>Amit</option><option>Neha</option></select></label><label>Status<select name="status"><option>Interested</option><option>Follow Up</option><option>Not Interested</option><option>Not Reachable</option></select></label><label>Next call date<input type="date" name="nextCall"></label></div><div class="modal-actions"><button type="button" class="secondary" id="cancelModal">Cancel</button><button class="primary">Save Institute</button></div></form></div>
+  <div class="toast" id="toast"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
