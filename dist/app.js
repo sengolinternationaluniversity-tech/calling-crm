@@ -1,0 +1,34 @@
+const institutes=[
+ {name:'ABC Coaching Center',city:'Delhi, India',phone:'9876543210',status:'Interested',owner:'Rahul',nextCall:'08 Sep'},
+ {name:'Bright Future Academy',city:'Mumbai, India',phone:'9123456780',status:'Follow Up',owner:'Priya',nextCall:'08 Sep'},
+ {name:'Global Study Point',city:'Bengaluru, India',phone:'9988776655',status:'Not Interested',owner:'Amit',nextCall:'—'},
+ {name:'Rising Stars Institute',city:'Pune, India',phone:'9871234567',status:'Interested',owner:'Neha',nextCall:'09 Sep'},
+ {name:'Knowledge Hub',city:'Ahmedabad, India',phone:'9012345678',status:'Follow Up',owner:'Rahul',nextCall:'10 Sep'},
+ {name:'Future Leaders',city:'Jaipur, India',phone:'9822081440',status:'Follow Up',owner:'Priya',nextCall:'10 Sep'},
+ {name:'Smart Learn Academy',city:'Lucknow, India',phone:'9765401234',status:'Not Reachable',owner:'Amit',nextCall:'11 Sep'}
+];
+const staff=[['Rahul Sharma','Sales Lead',142,76],['Priya Mehta','Relationship Manager',128,69],['Amit Verma','Calling Executive',119,63],['Neha Singh','Calling Executive',104,58]];
+const pageMeta={dashboard:['Dashboard','Welcome back! Here’s an overview of your CRM.'],institutes:['Institutes','Manage every lead and relationship in one place.'],calling:['Calling','Stay focused on today’s conversations and follow-ups.'],staff:['Staff','Track team workload and performance.'],reports:['Reports','Understand activity, conversion and team progress.'],import:['Data Import','Bring your existing institute data into the CRM.'],settings:['Settings','Manage your workspace preferences.']};
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+function cls(s){return s.toLowerCase().replaceAll(' ','-')}
+function renderTables(list=institutes){
+ $('#recentBody').innerHTML=list.slice(0,5).map((x,i)=>`<tr><td>${i+1}</td><td><b>${x.name}</b></td><td>${x.city}</td><td>${x.phone}</td><td><span class="badge ${cls(x.status)}">${x.status}</span></td><td><button class="row-btn" data-view="${x.phone}">View</button></td></tr>`).join('');
+ $('#allInstitutes').innerHTML=list.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.city}</td><td>${x.phone}</td><td>${x.owner}</td><td><span class="badge ${cls(x.status)}">${x.status}</span></td><td>${x.nextCall}</td><td><button class="row-btn" data-view="${x.phone}">Open →</button></td></tr>`).join('')||'<tr><td colspan="7">No institutes found.</td></tr>';
+ $('#instituteCount').textContent=(1241+institutes.length).toLocaleString('en-IN');
+ bindRowButtons();
+}
+function renderFollowups(){const rows=institutes.filter(x=>x.status==='Follow Up');$('#followupCount').textContent=80+Math.max(0,rows.length-2);$('#followupList').innerHTML=rows.slice(0,5).map(x=>`<div class="followup"><div><strong>${x.name}</strong><small>${x.owner} · ${x.phone}</small></div><time>${x.nextCall}</time></div>`).join('');$('#callQueue').innerHTML=institutes.filter(x=>x.nextCall!=='—').slice(0,5).map(x=>`<div class="call-item"><div class="avatar">${x.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div><b>${x.name}</b><small>${x.phone} · ${x.owner}</small></div><button class="primary call-now" data-name="${x.name}">Call</button></div>`).join('');}
+function renderCharts(){const data=[['Jan',62,37,15],['Feb',68,42,17],['Mar',72,46,20],['Apr',75,53,24],['May',100,44,61],['Jun',95,68,30]];$('#barChart').innerHTML=data.map(([m,a,b,c])=>`<div class="bar-month" data-month="${m}"><i class="bar blue-dot" style="height:${a}%"></i><i class="bar green-dot" style="height:${b}%"></i><i class="bar orange-dot" style="height:${c}%"></i></div>`).join('')}
+function renderStaff(){ $('#staffGrid').innerHTML=staff.map((s,i)=>`<article class="card staff-card"><div class="avatar">${s[0].split(' ').map(x=>x[0]).join('')}</div><h3>${s[0]}</h3><p>${s[1]}</p><div class="staff-stat"><span><b>${s[2]}</b><small>Calls</small></span><span><b>${s[3]}%</b><small>Reached</small></span></div></article>`).join('');$('#performance').innerHTML=staff.map(s=>`<div class="performance-row"><b>${s[0]}</b><div class="progress"><i style="width:${s[3]}%"></i></div><span>${s[3]}%</span></div>`).join('')}
+function showPage(name){$$('.page').forEach(p=>p.classList.remove('active'));$(`#${name}Page`).classList.add('active');$$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===name));$('#pageTitle').textContent=pageMeta[name][0];$('#pageSubtitle').textContent=pageMeta[name][1];$('#sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'})}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+function openModal(){ $('#modal').classList.add('open') } function closeModal(){ $('#modal').classList.remove('open');$('#instituteForm').reset() }
+function bindRowButtons(){$$('[data-view]').forEach(b=>b.onclick=()=>{const x=institutes.find(i=>i.phone===b.dataset.view);toast(`${x.name} · ${x.status} · Owner: ${x.owner}`)})}
+$$('.nav-item').forEach(b=>b.onclick=()=>showPage(b.dataset.page));$$('[data-jump]').forEach(b=>b.onclick=()=>showPage(b.dataset.jump));$$('[data-action="add"]').forEach(b=>b.onclick=openModal);
+$('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open');$('#closeModal').onclick=closeModal;$('#cancelModal').onclick=closeModal;$('#modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+$('#instituteForm').onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));institutes.unshift({name:d.name,city:d.city+', India',phone:d.phone,status:d.status,owner:d.owner,nextCall:d.nextCall?new Date(d.nextCall+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short'}):'—'});renderTables();renderFollowups();closeModal();toast('Institute added successfully');showPage('institutes')};
+function filter(){const q=$('#tableSearch').value.toLowerCase(),status=$('#statusFilter').value;renderTables(institutes.filter(x=>(status==='all'||x.status===status)&&Object.values(x).join(' ').toLowerCase().includes(q)))}$('#tableSearch').oninput=filter;$('#statusFilter').onchange=filter;
+$('#globalSearch').onkeydown=e=>{if(e.key==='Enter'){showPage('institutes');$('#tableSearch').value=e.target.value;filter()}};
+document.addEventListener('click',e=>{if(e.target.classList.contains('call-now'))toast(`Calling ${e.target.dataset.name}…`)});$('#startFirstCall').onclick=()=>toast(`Calling ${institutes[0].name}…`);$('#saveSettings').onclick=()=>toast('Settings saved');$('#helpBtn').onclick=()=>toast('Support request noted — we’ll contact you shortly');
+$('#csvInput').onchange=e=>{const f=e.target.files[0];if(!f)return;$('#uploadStatus').textContent=`${f.name} selected`;toast('CSV ready to import')};
+$('#today').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'long',year:'numeric'});renderTables();renderFollowups();renderCharts();renderStaff();
