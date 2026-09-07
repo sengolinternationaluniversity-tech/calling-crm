@@ -36,6 +36,7 @@
 <div id="recordModal" class="modal-bg"><form id="recordForm" class="modal"><div class="modal-head"><h2 id="modalTitle">Add Record</h2><button type="button" id="closeModal" class="close">×</button></div><input id="recordId" type="hidden"><div class="form-grid">
 <label class="field">Institute Name<input name="institute_name" required></label><label class="field">Owner Name<input name="owner_name"></label><label class="field full">Address<input name="address"></label><label class="field">Location<input name="location"></label><label class="field">State<input name="state"></label><label class="field">Country<input name="country" value="India"></label><label class="field">Mobile No.<input name="mobile_no"></label><label class="field">Email ID<input name="email_id" type="email"></label><label class="field">Data Source<input name="data_source"></label><label class="field admin-only">Assign Staff<select name="assigned_to" id="assignSelect"><option value="">Unassigned</option></select></label></div>
 <div class="modal-actions"><button type="button" id="cancelModal" class="btn secondary">Cancel</button><button class="btn primary">Save</button></div></form></div><div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const URL='https://mznmrxnxmplszrwjarey.supabase.co';
 const KEY='sb_publishable_U12mRVuPpXzsiU7uqFSu8A_qQmyZG6a';
