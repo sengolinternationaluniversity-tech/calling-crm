@@ -30,6 +30,13 @@ create table if not exists public.crm_institutes (
   deleted_at timestamptz
 );
 
+create table if not exists public.crm_office_locations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.crm_call_logs (
   id uuid primary key default gen_random_uuid(),
   institute_id uuid not null references public.crm_institutes(id) on delete cascade,
@@ -76,6 +83,7 @@ for each row execute procedure public.crm_set_updated_at();
 alter table public.crm_profiles enable row level security;
 alter table public.crm_institutes enable row level security;
 alter table public.crm_call_logs enable row level security;
+alter table public.crm_office_locations enable row level security;
 
 create policy "crm profile self read" on public.crm_profiles for select to authenticated
 using (id = auth.uid() or public.crm_is_admin());
@@ -91,6 +99,9 @@ using (public.crm_is_admin() or assigned_to = auth.uid())
 with check (public.crm_is_admin() or assigned_to = auth.uid());
 create policy "crm admin deletes rows" on public.crm_institutes for delete to authenticated
 using (public.crm_is_admin());
+
+create policy "crm users see office locations" on public.crm_office_locations for select to authenticated using (true);
+create policy "crm admin manages office locations" on public.crm_office_locations for all to authenticated using (public.crm_is_admin()) with check (public.crm_is_admin());
 
 create policy "crm staff sees own call logs" on public.crm_call_logs for select to authenticated
 using (public.crm_is_admin() or staff_id = auth.uid());
