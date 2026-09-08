@@ -24,8 +24,8 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 .master-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}.office-card{max-width:900px}.office-add{display:flex;gap:10px;margin:14px 0 20px}.office-add input{flex:1;padding:11px 13px;border:1px solid #d5dce7;border-radius:8px}.office-table td,.office-table th{padding:13px}.status-active{display:inline-block;background:#dcfce7;color:#087f5b;padding:5px 9px;border-radius:20px;font-size:12px}.office-actions{display:flex;gap:7px}@media(max-width:680px){.office-add{flex-direction:column}}
 
 /* Excel-style fixed institute grid */
-.institute-grid-wrap{max-height:none;overflow:visible;border:1px solid #d6dde8;border-radius:9px}
-.institute-data-table{table-layout:fixed;min-width:0;width:100%;border-collapse:separate;border-spacing:0}
+.institute-grid-wrap{max-height:none;overflow-x:auto;overflow-y:visible;border:1px solid #d6dde8;border-radius:9px;overscroll-behavior-x:contain}
+.institute-data-table{table-layout:fixed;min-width:1500px;width:100%;border-collapse:separate;border-spacing:0}
 .institute-data-table th,.institute-data-table td{height:46px;padding:8px 10px;border-right:1px solid #dfe5ee;border-bottom:1px solid #dfe5ee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;background:#fff}
 .institute-data-table th{position:sticky;top:72px;z-index:5;height:42px;background:#eaf0f7;font-weight:700;box-shadow:0 2px 0 #cbd5e1}
 .institute-data-table tbody tr:nth-child(even) td{background:#f9fbfd}.institute-data-table tbody tr:hover td{background:#edf5ff}
