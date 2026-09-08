@@ -2,6 +2,13 @@
 -- Run this file in Supabase Dashboard > SQL Editor.
 create extension if not exists pgcrypto;
 
+create table if not exists public.crm_office_locations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.crm_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null default '',
@@ -32,13 +39,6 @@ create table if not exists public.crm_institutes (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz
-);
-
-create table if not exists public.crm_office_locations (
-  id uuid primary key default gen_random_uuid(),
-  name text not null unique,
-  active boolean not null default true,
-  created_at timestamptz not null default now()
 );
 
 create table if not exists public.crm_call_logs (
@@ -89,31 +89,43 @@ alter table public.crm_institutes enable row level security;
 alter table public.crm_call_logs enable row level security;
 alter table public.crm_office_locations enable row level security;
 
+drop policy if exists "crm profile self read" on public.crm_profiles;
 create policy "crm profile self read" on public.crm_profiles for select to authenticated
 using (id = auth.uid() or public.crm_is_admin());
+drop policy if exists "crm admin manages profiles" on public.crm_profiles;
 create policy "crm admin manages profiles" on public.crm_profiles for update to authenticated
 using (public.crm_is_admin()) with check (public.crm_is_admin());
 
+drop policy if exists "crm admin deletes profiles" on public.crm_profiles;
 create policy "crm admin deletes profiles" on public.crm_profiles for delete to authenticated
 using (public.crm_is_admin());
 
+drop policy if exists "crm staff sees assigned rows" on public.crm_institutes;
 create policy "crm staff sees assigned rows" on public.crm_institutes for select to authenticated
 using (deleted_at is null and (public.crm_is_admin() or assigned_to = auth.uid()));
+drop policy if exists "crm admin inserts rows" on public.crm_institutes;
 create policy "crm admin inserts rows" on public.crm_institutes for insert to authenticated
 with check (public.crm_is_admin());
+drop policy if exists "crm staff edits assigned rows" on public.crm_institutes;
 create policy "crm staff edits assigned rows" on public.crm_institutes for update to authenticated
 using (public.crm_is_admin() or assigned_to = auth.uid())
 with check (public.crm_is_admin() or assigned_to = auth.uid());
+drop policy if exists "crm admin deletes rows" on public.crm_institutes;
 create policy "crm admin deletes rows" on public.crm_institutes for delete to authenticated
 using (public.crm_is_admin());
 
+drop policy if exists "crm users see office locations" on public.crm_office_locations;
 create policy "crm users see office locations" on public.crm_office_locations for select to authenticated using (true);
+drop policy if exists "crm admin manages office locations" on public.crm_office_locations;
 create policy "crm admin manages office locations" on public.crm_office_locations for all to authenticated using (public.crm_is_admin()) with check (public.crm_is_admin());
 
+drop policy if exists "crm staff sees own call logs" on public.crm_call_logs;
 create policy "crm staff sees own call logs" on public.crm_call_logs for select to authenticated
 using (public.crm_is_admin() or staff_id = auth.uid());
+drop policy if exists "crm staff creates own call logs" on public.crm_call_logs;
 create policy "crm staff creates own call logs" on public.crm_call_logs for insert to authenticated
 with check ((staff_id = auth.uid() and exists(select 1 from public.crm_institutes i where i.id = institute_id and i.assigned_to = auth.uid())) or public.crm_is_admin());
+drop policy if exists "crm staff edits own call logs" on public.crm_call_logs;
 create policy "crm staff edits own call logs" on public.crm_call_logs for update to authenticated
 using (public.crm_is_admin() or staff_id = auth.uid())
 with check (public.crm_is_admin() or staff_id = auth.uid());
