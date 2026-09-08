@@ -25,6 +25,12 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 
 .staff-manager{margin-top:18px}.staff-form-note{font-size:13px;color:var(--muted)}.staff-status{border:0;border-radius:20px;padding:7px 11px;cursor:pointer;font-weight:700}.staff-status.on{background:#dcfce7;color:#087f5b}.staff-status.off{background:#fee2e2;color:#b4232c}.staff-table td{vertical-align:middle}.password-note{font-size:12px;color:var(--muted);margin-top:-5px}
 
+/* Collapsible desktop sidebar */
+.side,.main{transition:transform .25s ease,margin-left .25s ease}
+.sidebar-toggle{width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:9px;background:#edf1f6;color:#10243c;font-size:22px;cursor:pointer;margin-right:14px;flex:none}
+@media (min-width:681px){body.sidebar-hidden .side{transform:translateX(-100%)}body.sidebar-hidden .main{margin-left:0}}
+@media (max-width:680px){.sidebar-toggle{display:none}}
+
 /* Desktop compact scale: matches browser zoom at 90% */
 @media (min-width:681px){body{zoom:.9}}
 </style>
@@ -42,7 +48,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 <aside class="side"><div class="brand"><span>Calling CRM<small>Connect · Track · Grow</small></span></div>
 <nav class="nav"><button class="active" data-page="dashboard">Dashboard</button><button data-page="master" class="admin-only">Master</button><button data-page="institutes">Institutes</button><button data-page="calling">Calling</button><button data-page="staff" class="admin-only">Staff</button><button data-page="reports">Reports</button><button data-page="import" class="admin-only">Data Import</button><button data-page="settings">Settings</button></nav>
 <div class="userbox"><b id="userName">User</b><small id="userEmail"></small><button id="logoutBtn" class="btn secondary wide">Logout</button></div></aside>
-<main class="main"><header class="top"><input id="globalSearch" placeholder="Search institute, mobile, location..."><span id="roleBadge" class="role"></span></header>
+<main class="main"><header class="top"><button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="Hide sidebar" aria-expanded="true">☰</button><input id="globalSearch" placeholder="Search institute, mobile, location..."><span id="roleBadge" class="role"></span></header>
 <div class="content">
 <section id="dashboardPage" class="page active"><div class="heading"><div><h1>Dashboard</h1><p id="welcome">Welcome back! Here’s an overview of your CRM.</p></div><span style="color:#718096" id="todayDate"></span></div>
 <div class="stats"><article class="stat"><b id="totalCount">0</b><span>Total Institutes</span></article><article class="stat"><b id="staffCount">0</b><span>Total Staff</span></article><article class="stat"><b id="assignedCount">0</b><span>Assigned Records</span></article><article class="stat"><b id="todayCount">0</b><span>Added Today</span></article></div>
@@ -74,7 +80,8 @@ const SUPABASE_URL='https://nvwqodfnzhrtzthckeaj.supabase.co';
 const KEY='sb_publishable_HwDRVPplJ4IbJBT2xZRTxw_Can1pPOr';
 const db=supabase.createClient(SUPABASE_URL,KEY);
 const S={user:null,profile:null,staff:[],page:1,size:100,total:0,search:'',staffId:'',state:'',location:'',source:'',masterRows:[],officeLocations:[],selectAllFiltered:false};
-const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const $=s=>document.querySelector(s),$=s=>document.querySelectorAll(s);
+const sidebarToggle=$('#sidebarToggle');if(sidebarToggle)sidebarToggle.onclick=()=>{const hidden=document.body.classList.toggle('sidebar-hidden');sidebarToggle.setAttribute('aria-expanded',String(!hidden));sidebarToggle.setAttribute('aria-label',hidden?'Show sidebar':'Hide sidebar')};
 function toast(m){$('#toast').textContent=m;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2500)}
 function isAdmin(){return S.profile?.role==='admin'}
 function applyRole(){ $$('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));$('#roleBadge').textContent=isAdmin()?'Admin':'Staff';$('#userName').textContent=S.profile?.full_name||'User';$('#userEmail').textContent=S.user.email;const se=$('#settingsEmail');if(se)se.textContent=S.user.email }
