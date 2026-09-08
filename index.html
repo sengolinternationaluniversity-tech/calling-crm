@@ -80,7 +80,7 @@ const SUPABASE_URL='https://nvwqodfnzhrtzthckeaj.supabase.co';
 const KEY='sb_publishable_HwDRVPplJ4IbJBT2xZRTxw_Can1pPOr';
 const db=supabase.createClient(SUPABASE_URL,KEY);
 const S={user:null,profile:null,staff:[],page:1,size:100,total:0,search:'',staffId:'',state:'',location:'',source:'',masterRows:[],officeLocations:[],selectAllFiltered:false};
-const $=s=>document.querySelector(s),$=s=>document.querySelectorAll(s);
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const sidebarToggle=$('#sidebarToggle');if(sidebarToggle)sidebarToggle.onclick=()=>{const hidden=document.body.classList.toggle('sidebar-hidden');sidebarToggle.setAttribute('aria-expanded',String(!hidden));sidebarToggle.setAttribute('aria-label',hidden?'Show sidebar':'Hide sidebar')};
 function toast(m){$('#toast').textContent=m;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2500)}
 function isAdmin(){return S.profile?.role==='admin'}
