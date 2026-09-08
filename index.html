@@ -24,7 +24,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 .master-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}.office-card{max-width:900px}.office-add{display:flex;gap:10px;margin:14px 0 20px}.office-add input{flex:1;padding:11px 13px;border:1px solid #d5dce7;border-radius:8px}.office-table td,.office-table th{padding:13px}.status-active{display:inline-block;background:#dcfce7;color:#087f5b;padding:5px 9px;border-radius:20px;font-size:12px}.office-actions{display:flex;gap:7px}@media(max-width:680px){.office-add{flex-direction:column}}
 
 /* Excel-style fixed institute grid */
-.institute-grid-wrap{max-height:calc(100vh - 245px);overflow:auto;border:1px solid #d6dde8;border-radius:9px}
+.institute-grid-wrap{max-height:none;overflow-x:auto;overflow-y:visible;border:1px solid #d6dde8;border-radius:9px}
 .institute-data-table{table-layout:fixed;min-width:1670px;width:1670px;border-collapse:separate;border-spacing:0}
 .institute-data-table th,.institute-data-table td{height:46px;padding:8px 10px;border-right:1px solid #dfe5ee;border-bottom:1px solid #dfe5ee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;background:#fff}
 .institute-data-table th{position:sticky;top:0;z-index:3;height:42px;background:#eaf0f7;font-weight:700}
@@ -106,7 +106,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-ser
 const SUPABASE_URL='https://nvwqodfnzhrtzthckeaj.supabase.co';
 const KEY='sb_publishable_HwDRVPplJ4IbJBT2xZRTxw_Can1pPOr';
 const db=supabase.createClient(SUPABASE_URL,KEY);
-const S={user:null,profile:null,staff:[],page:1,size:100,total:0,search:'',staffId:'',state:'',location:'',source:'',masterRows:[],officeLocations:[],selectAllFiltered:false};
+const S={user:null,profile:null,staff:[],page:1,size:50,total:0,search:'',staffId:'',state:'',location:'',source:'',masterRows:[],officeLocations:[],selectAllFiltered:false};
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const sidebarToggle=$('#sidebarToggle');if(sidebarToggle)sidebarToggle.onclick=()=>{const hidden=document.body.classList.toggle('sidebar-hidden');sidebarToggle.setAttribute('aria-expanded',String(!hidden));sidebarToggle.setAttribute('aria-label',hidden?'Show sidebar':'Hide sidebar')};
 const topMasterBtn=$('#topMasterBtn');if(topMasterBtn)topMasterBtn.onclick=()=>document.querySelector('[data-page="master"]').click();
