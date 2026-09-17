@@ -117,6 +117,29 @@ table:not(.institute-data-table) td{border-bottom:1px solid #d6ded8}.phone-chip{
 .login{background:linear-gradient(135deg,#123f31,#287257)}.login-card{border:1px solid #b9cbbf;border-radius:18px}
 @media(min-width:681px){body.sidebar-hidden .main{margin-left:0}.side,.main{transition:transform .22s ease,margin-left .22s ease}}
 @media(max-width:680px){.side{position:static;width:auto;margin:10px;height:auto}.main{margin-left:0}.content{padding:14px}.top{padding:0 12px}.nav{grid-template-columns:repeat(2,1fr)}}
+
+/* Institute grid action visibility fix */
+.institute-data-table{min-width:1880px}
+.institute-data-table th:nth-child(1),.institute-data-table td:nth-child(1){width:44px}
+.institute-data-table th:nth-child(2),.institute-data-table td:nth-child(2){width:64px}
+.institute-data-table th:nth-child(3),.institute-data-table td:nth-child(3){width:210px}
+.institute-data-table th:nth-child(4),.institute-data-table td:nth-child(4){width:150px}
+.institute-data-table th:nth-child(5),.institute-data-table td:nth-child(5){width:120px}
+.institute-data-table th:nth-child(6),.institute-data-table td:nth-child(6){width:100px}
+.institute-data-table th:nth-child(7),.institute-data-table td:nth-child(7){width:100px}
+.institute-data-table th:nth-child(8),.institute-data-table td:nth-child(8){width:145px}
+.institute-data-table th:nth-child(9),.institute-data-table td:nth-child(9){width:145px}
+.institute-data-table th:nth-child(10),.institute-data-table td:nth-child(10){width:170px}
+.institute-data-table th:nth-child(11),.institute-data-table td:nth-child(11){width:130px}
+.institute-data-table th:nth-child(12),.institute-data-table td:nth-child(12){width:145px;text-align:left}
+.institute-data-table th:nth-child(13),.institute-data-table td:nth-child(13){width:130px}
+.institute-data-table th:nth-child(14),.institute-data-table td:nth-child(14){width:80px;text-align:center}
+.institute-data-table th:nth-child(15),.institute-data-table td:nth-child(15){position:sticky;right:0;width:150px;min-width:150px;max-width:150px;overflow:visible;z-index:6;background:#fff;border-left:1px solid #b8c5bb;box-shadow:-4px 0 8px #173a6212}
+.institute-data-table th:nth-child(15){z-index:9;background:#f6f0ec}
+.institute-data-table tbody tr:nth-child(even) td:nth-child(15){background:#fbfcfa}
+.institute-data-table tbody tr:hover td:nth-child(15){background:#eef6f0}
+.institute-data-table td:nth-child(15) .actions{display:flex;flex-wrap:nowrap;gap:6px;min-width:128px}
+.institute-data-table td:nth-child(15) .btn{flex:none;padding:6px 9px}
 </style>
 </head>
 <body>
