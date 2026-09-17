@@ -323,6 +323,11 @@ body.staff-role #callingTabPanel>.call-toolbar{margin:0;padding:3px 5px;gap:5px;
 body.staff-role #callingTabPanel>.call-toolbar select{height:32px;padding:4px 8px}
 body.staff-role #callingTabPanel>.call-toolbar .btn{height:32px;padding:4px 10px}
 body.staff-role #callingTabPanel>article{margin-top:2px}
+
+/* Staff calling details: two fields per row */
+body.staff-role #callingPage .call-meta{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+}
 </style>
 </head>
 <body>
