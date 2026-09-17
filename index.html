@@ -328,6 +328,16 @@ body.staff-role #callingTabPanel>article{margin-top:2px}
 body.staff-role #callingPage .call-meta{
  grid-template-columns:repeat(2,minmax(0,1fr));
 }
+
+/* Staff calling fields without outer boxes */
+body.staff-role #callingPage .call-meta>div{
+ background:transparent;
+ border:0;
+ border-radius:0;
+ padding:0;
+ box-shadow:none;
+}
+body.staff-role #callingPage .call-meta{gap:8px 10px}
 </style>
 </head>
 <body>
