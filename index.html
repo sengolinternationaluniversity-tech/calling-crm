@@ -195,6 +195,12 @@ table:not(.institute-data-table) td{border-bottom:1px solid #d6ded8}.phone-chip{
 .management-tools .action-row{display:flex;flex-wrap:nowrap;overflow-x:auto;align-items:center}
 .management-tools .action-row .btn{flex:0 0 auto;white-space:nowrap}
 #downloadTemplate{white-space:nowrap}
+
+/* Staff: filters, Reset and Download Template in one row */
+body.staff-role .management-tools{display:flex;align-items:center;gap:6px;overflow-x:auto}
+body.staff-role .management-tools .filters{flex:1 0 760px;margin-bottom:0}
+body.staff-role .management-tools .action-row{flex:0 0 auto;overflow:visible}
+body.staff-role #downloadTemplate{height:36px;padding:6px 12px}
 </style>
 </head>
 <body>
