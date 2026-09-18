@@ -575,6 +575,18 @@ body{background:#fff8f2;color:#352318}
 body.staff-role #reportsPage>.report-filters{background:linear-gradient(135deg,#fff7f0,#f8e8de);border-color:#d9bca9}#staffReportDashboard .sr-card:has(#srTotalCalls){background:linear-gradient(135deg,#fff,#fff0e5);border-color:#e3bfa8}#staffReportDashboard .sr-card:has(#srTotalCalls) b{color:#a74416}#staffReportDashboard .sr-card:has(#srUniqueCalled){background:linear-gradient(135deg,#fff,#f7e4d7);border-color:#dcb9a3}#staffReportDashboard .sr-card:has(#srUniqueCalled) b{color:#7f3518}#staffReportDashboard .sr-card:has(#srInterested){background:linear-gradient(135deg,#fff,#fff4dd);border-color:#e8cea0}#staffReportDashboard .sr-card:has(#srInterested) b{color:#9a5a10}#staffReportDashboard .sr-card:has(#srDone){background:linear-gradient(135deg,#fff,#f6e6da);border-color:#d9b7a0}#staffReportDashboard .sr-card:has(#srDone) b{color:#71331a}#staffReportDashboard .sr-card:has(#srAssigned){background:linear-gradient(135deg,#fff,#fbece2);border-color:#dfc0ad}#staffReportDashboard .sr-card:has(#srAssigned) b{color:#8d3c19}#staffReportDashboard .sr-card:has(#srNotCalled){background:linear-gradient(135deg,#fff,#fff2e1);border-color:#e7c89f}#staffReportDashboard .sr-card:has(#srNotCalled) b{color:#985a12}#staffReportDashboard .sr-card:has(#srTodayFollowups){background:linear-gradient(135deg,#fff,#fff0da);border-color:#e6c58f}#staffReportDashboard .sr-card:has(#srTodayFollowups) b{color:#89500d}#staffReportDashboard .sr-card:has(#srOverdue){background:linear-gradient(135deg,#fff,#fde9e7);border-color:#e9bbb5}#staffReportDashboard .sr-card:has(#srOverdue) b{color:#c42c29}#staffReportDashboard .card:has(#srStatusBody){background:linear-gradient(135deg,#fff,#fff3e9);border-color:#dfc0ad}#staffReportDashboard .card:has(#srStageList){background:linear-gradient(135deg,#fff,#f8e8de);border-color:#d8b9a5}#staffReportDashboard .card:has(#srAttentionBody){background:linear-gradient(135deg,#fff,#fff0df);border-color:#e2c19b}#staffReportDashboard .card:has(#srInstituteBody){background:linear-gradient(135deg,#fff,#f7e7dc);border-color:#d9bba8}#staffReportDashboard .staff-report-section-title>span{background:#f8e8de;border-color:#d9bca9;color:#7c3519}.sr-stage-fill{background:linear-gradient(90deg,#ad4818,#6b321b)}
 .wa-stack .wa-icon{background:#218c5a!important;color:#fff!important}.wa-stack a.phone-chip{color:#218c5a!important}
 
+
+/* Staff report accordion sections */
+#staffReportDashboard .sr-accordion{padding:0;overflow:hidden;border-color:#d5ad94}
+#staffReportDashboard .sr-accordion-toggle{margin:0;padding:11px 14px;min-height:54px;background:linear-gradient(90deg,#a74416 0%,#853817 55%,#4a2b19 100%);color:#fff;cursor:pointer;user-select:none;border-radius:11px;gap:10px}
+#staffReportDashboard .sr-accordion-toggle h2,#staffReportDashboard .sr-accordion-toggle b{color:#fff}
+#staffReportDashboard .sr-accordion-toggle .subnote{color:#f6ddd0!important}
+#staffReportDashboard .sr-accordion-toggle:after{content:"⌄";margin-left:4px;font-size:22px;line-height:1;color:#fff;transition:transform .18s ease}
+#staffReportDashboard .sr-accordion.collapsed .sr-accordion-toggle:after{transform:rotate(-90deg)}
+#staffReportDashboard .sr-accordion-content{margin:0 12px 12px}
+#staffReportDashboard .sr-accordion.collapsed .sr-accordion-content{display:none}
+#staffReportDashboard .sr-accordion:not(.collapsed) .sr-accordion-toggle{border-radius:11px 11px 7px 7px}
+
 </style>
 </head>
 <body>
@@ -644,14 +656,14 @@ body.staff-role #reportsPage>.report-filters{background:linear-gradient(135deg,#
     </article>
   </div>
 
-  <article class="card">
-    <div class="toolbar"><div><h2>Needs Attention</h2><p class="subnote">Overdue, today follow-up, interested without next date aur not-called records.</p></div><b id="srAttentionCount">0 records</b></div>
-    <div class="table-wrap"><table class="sr-table"><thead><tr><th>Institute</th><th>Mobile</th><th>Reason</th><th>Current Status</th><th>Next Call</th><th>Action</th></tr></thead><tbody id="srAttentionBody"><tr><td colspan="6" class="empty">No pending action</td></tr></tbody></table></div>
+  <article class="card sr-accordion collapsed" id="srAttentionAccordion">
+    <div class="toolbar sr-accordion-toggle" role="button" tabindex="0" aria-expanded="false"><div><h2>Needs Attention</h2><p class="subnote">Overdue, today follow-up, interested without next date aur not-called records.</p></div><b id="srAttentionCount">0 records</b></div>
+    <div class="table-wrap sr-accordion-content"><table class="sr-table"><thead><tr><th>Institute</th><th>Mobile</th><th>Reason</th><th>Current Status</th><th>Next Call</th><th>Action</th></tr></thead><tbody id="srAttentionBody"><tr><td colspan="6" class="empty">No pending action</td></tr></tbody></table></div>
   </article>
 
-  <article class="card">
-    <div class="toolbar"><div><h2>Institute-wise Activity</h2><p class="subnote">Selected period mein institute-wise calls, latest status aur remarks.</p></div><b id="srInstituteCount">0 institutes</b></div>
-    <div class="table-wrap"><table class="sr-table"><thead><tr><th>Institute</th><th>Mobile</th><th>Calls</th><th>Last Call</th><th>Latest Status</th><th>Latest Remarks</th><th>Next Call</th><th>History</th></tr></thead><tbody id="srInstituteBody"><tr><td colspan="8" class="empty">No activity in this range</td></tr></tbody></table></div>
+  <article class="card sr-accordion collapsed" id="srInstituteAccordion">
+    <div class="toolbar sr-accordion-toggle" role="button" tabindex="0" aria-expanded="false"><div><h2>Institute-wise Activity</h2><p class="subnote">Selected period mein institute-wise calls, latest status aur remarks.</p></div><b id="srInstituteCount">0 institutes</b></div>
+    <div class="table-wrap sr-accordion-content"><table class="sr-table"><thead><tr><th>Institute</th><th>Mobile</th><th>Calls</th><th>Last Call</th><th>Latest Status</th><th>Latest Remarks</th><th>Next Call</th><th>History</th></tr></thead><tbody id="srInstituteBody"><tr><td colspan="8" class="empty">No activity in this range</td></tr></tbody></table></div>
   </article>
 </section>
 <div class="stats report-stats"><article class="stat"><b id="reportTotalCalls">0</b><span>Total Calls</span></article><article class="stat"><b id="reportInterested">0</b><span>Interested</span></article><article class="stat"><b id="reportFollowups">0</b><span>Follow Ups</span></article><article class="stat"><b id="reportAdmissions">0</b><span>Admissions</span></article></div><div class="report-grid"><article class="card"><h2>Call Status</h2><div class="table-wrap"><table><thead><tr><th>Status</th><th>Calls</th><th>%</th></tr></thead><tbody id="reportStatusBody"></tbody></table></div></article><article class="card"><h2>Staff Performance</h2><div class="table-wrap"><table><thead><tr><th>Staff</th><th>Total</th><th>Interested</th><th>Follow Up</th><th>Admissions</th></tr></thead><tbody id="reportStaffBody"></tbody></table></div></article></div><article class="card report-history"><div class="toolbar"><div><h2>Detailed Call History</h2><p>Kis institute se kya baat hui aur अगली call कब करनी है।</p></div><span id="reportHistoryCount">0 entries</span></div><div class="table-wrap"><table class="report-history-table"><thead><tr><th>Call Date</th><th class="admin-report-only">Staff</th><th class="staff-report-only">WhatsApp No.</th><th>Institute</th><th>Mobile</th><th>Status</th><th>Remarks / Kya Baat Hui</th><th>Next Call</th><th class="admin-only">Action</th></tr></thead><tbody id="reportHistoryBody"><tr><td colspan="7" class="empty">No call history</td></tr></tbody></table></div></article></section>
@@ -956,4 +968,17 @@ function setupFrozenInstituteHeader(){
 }
 setupFrozenInstituteHeader();
 const dateEl=$('#todayDate');if(dateEl)dateEl.textContent=formatDate(new Date());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')location.reload()});init();
+
+function setupStaffReportAccordions(){
+ document.querySelectorAll('#staffReportDashboard .sr-accordion').forEach(section=>{
+  const toggle=section.querySelector('.sr-accordion-toggle');
+  if(!toggle||toggle.dataset.bound==='1')return;
+  toggle.dataset.bound='1';
+  const switchState=()=>{const collapsed=section.classList.toggle('collapsed');toggle.setAttribute('aria-expanded',String(!collapsed));};
+  toggle.addEventListener('click',switchState);
+  toggle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();switchState()}});
+ });
+}
+setupStaffReportAccordions();
+
 </script></body></html>
