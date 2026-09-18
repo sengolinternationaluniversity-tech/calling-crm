@@ -467,16 +467,6 @@ body.staff-role #historyTabPanel .call-history-table td:nth-child(2) .phone-chip
  padding:3px 6px;
  border-radius:6px;
 }
-
-/* Show selected status names in the closed filter */
-body.staff-role #historyStatusFilter>summary{
- width:auto;
- min-width:150px;
- max-width:520px;
- white-space:nowrap;
- overflow-x:auto;
- scrollbar-width:thin;
-}
 </style>
 </head>
 <body>
@@ -597,7 +587,7 @@ function statusRange(reset=false){const from=$('#statusFrom'),to=$('#statusTo'),
 async function loadCallStats(){const range=statusRange();if(!range)return;const {start,end}=range;let pending=db.from('crm_institute_call_state').select('*',{count:'exact',head:true}).is('last_status',null),follow=db.from('crm_institute_call_state').select('*',{count:'exact',head:true}).not('next_call_at','is',null).gte('next_call_at',start).lte('next_call_at',end),notReach=db.from('crm_call_logs').select('*',{count:'exact',head:true}).eq('status','Not Reachable').gte('created_at',start).lte('created_at',end),calls=db.from('crm_call_logs').select('*',{count:'exact',head:true}).gte('created_at',start).lte('created_at',end);if(isAdmin()){const staff=$('#callStaffFilter')?.value;if(staff){pending=pending.eq('assigned_to',staff);follow=follow.eq('assigned_to',staff);notReach=notReach.eq('staff_id',staff);calls=calls.eq('staff_id',staff)}else{pending=pending.not('assigned_to','is',null);follow=follow.not('assigned_to','is',null)}}const [p,f,n,t]=await Promise.all([pending,follow,notReach,calls]);const error=p.error||f.error||n.error||t.error;if(error){toast(error.message);return}$('#callPendingCount').textContent=(p.count||0).toLocaleString();$('#callTodayCount').textContent=(t.count||0).toLocaleString();$('#callFollowCount').textContent=(f.count||0).toLocaleString();$('#callNotReachCount').textContent=(n.count||0).toLocaleString()}
 async function loadFollowups(mode='today'){S.followMode=mode;$$('[data-follow-mode]').forEach(b=>b.classList.toggle('active',b.dataset.followMode===mode));const {start,end}=callDayBounds(),now=new Date().toISOString();let q=db.from('crm_institute_call_state').select('id,institute_name,mobile_no,last_status,next_call_at,assigned_to').not('next_call_at','is',null).order('next_call_at',{ascending:true}).limit(100);if(mode==='today')q=q.gte('next_call_at',start).lt('next_call_at',end);if(mode==='overdue')q=q.lt('next_call_at',now);if(mode==='upcoming')q=q.gte('next_call_at',end);if(isAdmin()){const staff=$('#callStaffFilter')?.value;if(staff)q=q.eq('assigned_to',staff);else q=q.not('assigned_to','is',null)}const {data,error}=await q;if(error){toast(error.message);return}$('#followupBody').innerHTML=(data||[]).map(x=>`<tr><td><b>${esc(x.institute_name)}</b><br><small>${esc(x.mobile_no||'')}</small></td><td>${formatDate(x.next_call_at)}</td><td>${esc(x.last_status||'—')}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">No follow-ups</td></tr>'}
 function selectedHistoryStatuses(){return [...document.querySelectorAll('[data-history-status]:checked')].map(x=>x.value)}
-function updateHistoryStatusSummary(){const selected=selectedHistoryStatuses(),summary=$('#historyStatusSummary'),text=selected.length?selected.join(', '):'No Status';if(summary){summary.textContent=text;summary.title=text}}
+function updateHistoryStatusSummary(){const selected=selectedHistoryStatuses(),total=document.querySelectorAll('[data-history-status]').length,summary=$('#historyStatusSummary');if(summary)summary.textContent=total&&selected.length===total?'All Status':selected.length+' Status Selected'}
 let historyStatusInitialized=false,historyStatusTimer;
 function scheduleHistoryStatusRefresh(){clearTimeout(historyStatusTimer);historyStatusTimer=setTimeout(()=>loadCallingHistory(),120)}
 function syncHistoryStatusAll(){const all=$('#historyStatusAll'),items=[...document.querySelectorAll('[data-history-status]')];if(!all)return;const checked=items.filter(x=>x.checked).length;all.checked=items.length>0&&checked===items.length;all.indeterminate=checked>0&&checked<items.length}
