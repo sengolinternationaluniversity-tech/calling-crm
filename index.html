@@ -614,6 +614,7 @@ body.staff-role #dashboardPage>.lower-grid,
 body.staff-role #dashboardPage>.quick-grid{display:none!important}
 body.staff-role .content:has(#dashboardPage.active){padding-top:12px}
 #staffDashboard{display:grid;gap:12px}
+body.staff-role #dashboardPage:not(.active)+#staffDashboard{display:none!important}
 .staff-dash-hero{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 18px;border:1px solid #d9b79f;border-radius:14px;background:linear-gradient(105deg,#fff6ef 0%,#f4dfd2 62%,#ead0bf 100%)}
 .staff-dash-hero h1{margin:0;color:#5e2e18;font-size:24px}.staff-dash-hero p{margin:4px 0 0;color:#7b685c;font-size:13px}.staff-dash-hero .btn{background:linear-gradient(90deg,#a74416,#713119);white-space:nowrap}
 .staff-dash-cards{display:grid;grid-template-columns:repeat(8,minmax(118px,1fr));gap:9px}
