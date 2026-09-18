@@ -1,0 +1,77 @@
+name: One-time colorful staff report
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-colorful-staff-report.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  style-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Add subtle colorful staff report boxes
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          marker = '/* Staff report colorful boxes */'
+          if marker not in text:
+              css = r'''
+
+/* Staff report colorful boxes */
+body.staff-role #reportsPage>.report-filters{
+  background:linear-gradient(135deg,#f5fbf7,#eef7ff);
+  border-color:#bfd4c7;
+}
+#staffReportDashboard .sr-card{
+  box-shadow:0 4px 12px #18375c0a;
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+#staffReportDashboard .sr-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 7px 18px #18375c12;
+}
+#staffReportDashboard .sr-card:has(#srTotalCalls){background:linear-gradient(135deg,#ffffff,#eaf5ff);border-color:#b9d8f2}
+#staffReportDashboard .sr-card:has(#srTotalCalls) b{color:#1e67a8}
+#staffReportDashboard .sr-card:has(#srUniqueCalled){background:linear-gradient(135deg,#ffffff,#f2edff);border-color:#d2c4ef}
+#staffReportDashboard .sr-card:has(#srUniqueCalled) b{color:#6b4ba6}
+#staffReportDashboard .sr-card:has(#srInterested){background:linear-gradient(135deg,#ffffff,#eaf8ef);border-color:#b9dec7}
+#staffReportDashboard .sr-card:has(#srInterested) b{color:#087f5b}
+#staffReportDashboard .sr-card:has(#srDone){background:linear-gradient(135deg,#ffffff,#e9f8f6);border-color:#b5ded8}
+#staffReportDashboard .sr-card:has(#srDone) b{color:#147a70}
+#staffReportDashboard .sr-card:has(#srAssigned){background:linear-gradient(135deg,#ffffff,#eef3ff);border-color:#c4d1ef}
+#staffReportDashboard .sr-card:has(#srAssigned) b{color:#445fa8}
+#staffReportDashboard .sr-card:has(#srNotCalled){background:linear-gradient(135deg,#ffffff,#fff6e8);border-color:#edd4a8}
+#staffReportDashboard .sr-card:has(#srNotCalled) b{color:#a56a12}
+#staffReportDashboard .sr-card:has(#srTodayFollowups){background:linear-gradient(135deg,#ffffff,#fffbe5);border-color:#e8d98e}
+#staffReportDashboard .sr-card:has(#srTodayFollowups) b{color:#8a6500}
+#staffReportDashboard .sr-card:has(#srOverdue){background:linear-gradient(135deg,#ffffff,#fff0ef);border-color:#e8bbb7}
+#staffReportDashboard .sr-card:has(#srOverdue) b{color:#b4232c}
+#staffReportDashboard .card:has(#srStatusBody){background:linear-gradient(135deg,#ffffff,#f1f8ff);border-color:#c4dced}
+#staffReportDashboard .card:has(#srStageList){background:linear-gradient(135deg,#ffffff,#f6f1ff);border-color:#d9c9ef}
+#staffReportDashboard .card:has(#srAttentionBody){background:linear-gradient(135deg,#ffffff,#fff7ed);border-color:#ead3b5}
+#staffReportDashboard .card:has(#srInstituteBody){background:linear-gradient(135deg,#ffffff,#eef9f3);border-color:#bedccb}
+#staffReportDashboard .card .table-wrap{background:#fff}
+#staffReportDashboard .staff-report-section-title>span{
+  padding:4px 9px;border-radius:20px;background:#edf4ef;border:1px solid #d0ddd4;
+}
+'''
+              text = text.replace('\n</style>', css + '\n</style>', 1)
+              path.write_text(text, encoding='utf-8')
+      - name: Commit styling
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Add colorful staff report cards"
+            git push origin main
+          fi
