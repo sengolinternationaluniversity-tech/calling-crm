@@ -428,6 +428,30 @@ body.staff-role #historyTabPanel .call-history-table td{
 }
 body.staff-role #historyTabPanel .call-history-table th:last-child,
 body.staff-role #historyTabPanel .call-history-table td:last-child{border-right:0}
+
+/* Auto-fit compact Call History columns */
+body.staff-role #historyTabPanel .call-history-table{table-layout:auto}
+body.staff-role #historyTabPanel .call-history-table th,
+body.staff-role #historyTabPanel .call-history-table td{padding-left:7px;padding-right:7px}
+body.staff-role #historyTabPanel .call-history-table th:nth-child(1),
+body.staff-role #historyTabPanel .call-history-table td:nth-child(1),
+body.staff-role #historyTabPanel .call-history-table th:nth-child(4),
+body.staff-role #historyTabPanel .call-history-table td:nth-child(4),
+body.staff-role #historyTabPanel .call-history-table th:nth-child(5),
+body.staff-role #historyTabPanel .call-history-table td:nth-child(5),
+body.staff-role #historyTabPanel .call-history-table th:nth-child(6),
+body.staff-role #historyTabPanel .call-history-table td:nth-child(6),
+body.staff-role #historyTabPanel .call-history-table th:nth-child(7),
+body.staff-role #historyTabPanel .call-history-table td:nth-child(7){
+ width:1%;
+ white-space:nowrap;
+}
+body.staff-role #historyTabPanel .call-history-table th:nth-child(6),
+body.staff-role #historyTabPanel .call-history-table td:nth-child(6){
+ max-width:260px;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
 </style>
 </head>
 <body>
