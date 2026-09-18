@@ -415,6 +415,19 @@ body.staff-role #historyStatusFilter .history-status-options span{
  font-size:11px;
  line-height:1.15;
 }
+
+/* Clear horizontal and vertical grid lines in Call History */
+body.staff-role #historyTabPanel .call-history-table{
+ border-collapse:collapse;
+ border:1px solid #cbd6ce;
+}
+body.staff-role #historyTabPanel .call-history-table th,
+body.staff-role #historyTabPanel .call-history-table td{
+ border-right:1px solid #d4ddd7;
+ border-bottom:1px solid #cbd6ce;
+}
+body.staff-role #historyTabPanel .call-history-table th:last-child,
+body.staff-role #historyTabPanel .call-history-table td:last-child{border-right:0}
 </style>
 </head>
 <body>
