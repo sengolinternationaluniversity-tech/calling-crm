@@ -1544,4 +1544,40 @@ const staffGridSource=document.getElementById('staffGrid');
 if(staffGridSource)new MutationObserver(()=>renderAdminStaffExcelTable()).observe(staffGridSource,{childList:true,subtree:true,characterData:true});
 document.querySelector('[data-page="staff"]')?.addEventListener('click',()=>setTimeout(renderAdminStaffExcelTable,0));
 
+
+/* Staff University Detail new-tab behavior */
+(function(){
+  const universityNav=document.querySelector('[data-page="universitydetail"]');
+  if(!universityNav)return;
+  const originalUniversityClick=universityNav.onclick;
+  const isDedicatedUniversityTab=()=>new URLSearchParams(window.location.search).get('view')==='universitydetail';
+
+  universityNav.onclick=function(e){
+    if(S.profile && !isAdmin() && !isDedicatedUniversityTab()){
+      if(e?.preventDefault)e.preventDefault();
+      const url=new URL(window.location.href);
+      url.searchParams.set('view','universitydetail');
+      url.hash='';
+      window.open(url.toString(),'_blank','noopener');
+      return;
+    }
+    if(typeof originalUniversityClick==='function')return originalUniversityClick.call(this,e);
+  };
+
+  if(isDedicatedUniversityTab()){
+    let attempts=0;
+    const openUniversityPage=()=>{
+      attempts++;
+      if(S.profile && !isAdmin()){
+        universityNav.click();
+        return true;
+      }
+      return attempts>80;
+    };
+    if(!openUniversityPage()){
+      const timer=setInterval(()=>{if(openUniversityPage())clearInterval(timer)},100);
+    }
+  }
+})();
+
 </script></body></html>
