@@ -959,6 +959,15 @@ body:not(.staff-role) #roleBadge{cursor:pointer;user-select:none;transition:back
 body:not(.staff-role) #roleBadge:hover{background:#dfeaff;border-color:#a9c5ea}
 body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
 
+
+
+/* Sidebar university detail */
+.sidebar-university{margin:-4px 8px 14px;padding:10px 11px;border:1px solid #d8e5f3;border-radius:10px;background:linear-gradient(135deg,#ffffff,#f1f7ff);display:flex;gap:9px;align-items:flex-start}
+.sidebar-university-icon{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:8px;background:#e8f1ff;color:#2563eb;font-size:15px}
+.sidebar-university b{display:block;color:#173f6c;font-size:11px;line-height:1.25}
+.sidebar-university small{display:block;margin-top:3px;color:#71869d;font-size:9px;line-height:1.25}
+@media(max-width:680px){.sidebar-university{margin:0 8px 12px}}
+
 </style>
 </head>
 <body>
@@ -972,6 +981,7 @@ body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline
 </section>
 <div id="appView" class="shell hidden">
 <aside class="side"><div class="brand"><span>Calling CRM<small>Connect · Track · Grow</small></span></div>
+<div class="sidebar-university"><span class="sidebar-university-icon">◆</span><div><b>Sengol International University</b><small>Admissions &amp; Outreach CRM</small></div></div>
 <nav class="nav"><button class="active" data-page="dashboard">Dashboard</button><button data-page="institutes">Institutes</button><button data-page="calling" class="staff-nav-only">Calling</button><button data-page="staff" class="admin-only">Staff</button><button data-page="reports">Reports</button><button data-page="import" class="admin-only">Data Import</button><button data-page="callstatus" class="admin-only">Call Status</button><button data-page="settings">Settings</button></nav>
 <div class="userbox"><b id="userName">User</b><small id="userEmail"></small><button id="logoutBtn" class="btn secondary wide">Logout</button></div></aside>
 <main class="main"><header class="top"><button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="Hide sidebar" aria-expanded="true">☰</button><span id="topContextTitle" class="top-context-title hidden">Master CRM <button id="toggleMasterSummary" class="top-summary-toggle" type="button" aria-label="Hide master summary" aria-expanded="true">▴</button></span><div id="topInstituteTabs" class="top-institute-tabs hidden"><div class="institute-tabs"><button type="button" class="institute-tab admin-only active" data-institute-tab="all">All Data</button><button type="button" class="institute-tab admin-only" data-institute-tab="pending">Pending Data</button><button type="button" class="institute-tab staff-only active" data-institute-tab="all">All</button><button type="button" class="institute-tab staff-only" data-institute-tab="pending">Pending</button><button type="button" class="institute-tab staff-only" data-institute-tab="done">Done</button><button type="button" class="institute-tab admin-only" data-institute-tab="assign">Assign Data</button></div></div><input id="globalSearch" placeholder="Search institute, mobile, location..."><span id="roleBadge" class="role"></span><button id="topMasterBtn" class="top-master-btn admin-only" type="button">Master</button></header>
