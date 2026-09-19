@@ -1027,6 +1027,14 @@ body:not(.staff-role) .fee-admin-tools{display:block}
 @media(max-width:980px){#feeColumnManager.fee-column-manager{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){#feeColumnManager.fee-column-manager{grid-template-columns:1fr}}
 
+
+
+/* Fee Detail search */
+.fee-search-wrap{margin:14px 0 4px}
+.fee-search-wrap input{width:min(680px,100%);padding:11px 14px;border:1px solid #c8d8e9;border-radius:9px;background:#fff;color:#17324d;outline:none}
+.fee-search-wrap input:focus{border-color:#7fa6d1;box-shadow:0 0 0 3px #dceafb}
+.fee-search-wrap input::placeholder{color:#7b8ea2}
+
 </style>
 </head>
 <body>
@@ -1203,6 +1211,7 @@ body:not(.staff-role) .fee-admin-tools{display:block}
   </div>
   <section class="card university-detail-panel" data-university-panel="fee">
     <div class="toolbar"><div><h2>Fee Detail</h2><p class="university-detail-note">Admin ke saved departments, columns, calculations aur courses yahan live dikhte hain.</p></div><div class="fee-admin-actions"><button id="addFeeDepartment" class="btn primary admin-only" type="button">+ Department</button><button id="refreshFeeBuilder" class="btn secondary" type="button">Refresh</button></div></div>
+    <div class="fee-search-wrap"><input id="feeSearch" type="search" autocomplete="off" placeholder="Search course, specialization, eligibility, faculty..."></div>
     <div id="feeBuilderHost"><p class="empty">Fee details loading...</p></div>
   </section>
   <section class="card university-detail-panel admin-only" data-university-panel="feesettings">
@@ -1652,7 +1661,23 @@ function feeEvalFormula(expr,row){if(!expr)return null;try{const t=feeFormulaTok
 function feeResolvedRow(row,columns){const data={...(row.row_data||{})};columns.filter(c=>c.formula).forEach(()=>columns.filter(c=>c.formula).forEach(c=>{const v=feeEvalFormula(c.formula,data);if(v!==null)data[c.column_key]=v}));return data}
 function feeDisplayValue(col,val){if(val===null||val===undefined||val==='')return '—';if(col.value_type==='currency')return '₹'+feeNumber(val).toLocaleString('en-IN',{maximumFractionDigits:2});if(col.value_type==='number')return feeNumber(val).toLocaleString('en-IN',{maximumFractionDigits:2});return esc(String(val))}
 async function loadFeeBuilder(){const host=$('#feeBuilderHost');if(!host)return;host.innerHTML='<p class="empty">Fee details loading...</p>';const [d,c,r]=await Promise.all([db.from('crm_university_fee_departments').select('*').order('sort_order').order('name'),db.from('crm_university_fee_columns').select('*').order('sort_order').order('label'),db.from('crm_university_fee_rows').select('*').order('sort_order')]);const error=d.error||c.error||r.error;if(error){host.innerHTML='<p class="empty">Fee details load nahi hui</p>';toast(error.message);return}S.feeDepartments=d.data||[];S.feeColumns=c.data||[];S.feeRows=r.data||[];renderFeeBuilder()}
-function renderFeeBuilder(){const host=$('#feeBuilderHost'),allCols=S.feeColumns||[],cols=allCols.filter(x=>x.active),deps=(S.feeDepartments||[]).filter(x=>x.active);const manager=$('#feeColumnManager');if(manager&&isAdmin())manager.innerHTML=allCols.map(c=>`<span class="fee-column-chip ${c.active?'':'inactive'}"><b>${esc(c.label)}</b><small>${esc(c.column_key)}${c.formula?' = '+esc(c.formula):''}</small><button type="button" onclick="editFeeColumn('${attr(c.id)}')">Edit</button><button type="button" onclick="toggleFeeColumn('${attr(c.id)}',${!c.active})">${c.active?'Hide':'Show'}</button><button type="button" onclick="deleteFeeColumn('${attr(c.id)}')">×</button></span>`).join('')||'<span class="fee-builder-note">No columns</span>';host.innerHTML=deps.map(dep=>{const rows=(S.feeRows||[]).filter(x=>x.department_id===dep.id&&x.active);return `<section class="fee-department"><div class="fee-department-head"><h3>${esc(dep.name)}</h3>${isAdmin()?`<div class="fee-department-actions"><button class="btn primary" type="button" onclick="openFeeRowEditor('${attr(dep.id)}')">+ Course</button><button class="btn secondary" type="button" onclick="editFeeDepartment('${attr(dep.id)}')">Edit Department</button><button class="btn danger" type="button" onclick="deleteFeeDepartment('${attr(dep.id)}')">Delete</button></div>`:''}</div><div class="fee-data-wrap"><table class="fee-data-table"><thead><tr><th>S.No.</th>${cols.map(c=>`<th title="Key: ${attr(c.column_key)}${c.formula?' | Formula: '+attr(c.formula):''}">${esc(c.label)}</th>`).join('')}${isAdmin()?'<th>Action</th>':''}</tr></thead><tbody>${rows.map((row,i)=>{const data=feeResolvedRow(row,cols);return `<tr><td>${i+1}</td>${cols.map(c=>`<td class="${c.value_type==='currency'?'fee-currency':''}">${feeDisplayValue(c,data[c.column_key])}</td>`).join('')}${isAdmin()?`<td class="fee-row-actions"><button class="btn secondary" type="button" onclick="openFeeRowEditor('${attr(dep.id)}','${attr(row.id)}')">Edit</button><button class="btn danger" type="button" onclick="deleteFeeRow('${attr(row.id)}')">Delete</button></td>`:''}</tr>`}).join('')||`<tr><td colspan="${cols.length+1+(isAdmin()?1:0)}" class="empty">No courses added</td></tr>`}</tbody></table></div></section>`}).join('')||'<p class="empty">No active departments</p>'}
+function renderFeeBuilder(){
+ const host=$('#feeBuilderHost'),allCols=S.feeColumns||[],cols=allCols.filter(x=>x.active),deps=(S.feeDepartments||[]).filter(x=>x.active),query=String($('#feeSearch')?.value||'').trim().toLowerCase();
+ const manager=$('#feeColumnManager');
+ if(manager&&isAdmin())manager.innerHTML=allCols.map(c=>`<span class="fee-column-chip ${c.active?'':'inactive'}"><b>${esc(c.label)}</b><small>${esc(c.column_key)}${c.formula?' = '+esc(c.formula):''}</small><button type="button" onclick="editFeeColumn('${attr(c.id)}')">Edit</button><button type="button" onclick="toggleFeeColumn('${attr(c.id)}',${!c.active})">${c.active?'Hide':'Show'}</button><button type="button" onclick="deleteFeeColumn('${attr(c.id)}')">×</button></span>`).join('')||'<span class="fee-builder-note">No columns</span>';
+ const sections=deps.map(dep=>{
+   const departmentMatch=query&&String(dep.name||'').toLowerCase().includes(query);
+   const rows=(S.feeRows||[]).filter(x=>x.department_id===dep.id&&x.active).filter(row=>{
+     if(!query||departmentMatch)return true;
+     const resolved=feeResolvedRow(row,cols),hay=[dep.name,...Object.values(row.row_data||{}),...cols.map(c=>c.label),...cols.map(c=>resolved[c.column_key])].map(v=>String(v??'')).join(' ').toLowerCase();
+     return hay.includes(query)
+   });
+   if(query&&!departmentMatch&&!rows.length)return '';
+   return `<section class="fee-department"><div class="fee-department-head"><h3>${esc(dep.name)}</h3>${isAdmin()?`<div class="fee-department-actions"><button class="btn primary" type="button" onclick="openFeeRowEditor('${attr(dep.id)}')">+ Course</button><button class="btn secondary" type="button" onclick="editFeeDepartment('${attr(dep.id)}')">Edit Department</button><button class="btn danger" type="button" onclick="deleteFeeDepartment('${attr(dep.id)}')">Delete</button></div>`:''}</div><div class="fee-data-wrap"><table class="fee-data-table"><thead><tr><th>S.No.</th>${cols.map(c=>`<th title="Key: ${attr(c.column_key)}${c.formula?' | Formula: '+attr(c.formula):''}">${esc(c.label)}</th>`).join('')}${isAdmin()?'<th>Action</th>':''}</tr></thead><tbody>${rows.map((row,i)=>{const data=feeResolvedRow(row,cols);return `<tr><td>${i+1}</td>${cols.map(c=>`<td class="${c.value_type==='currency'?'fee-currency':''}">${feeDisplayValue(c,data[c.column_key])}</td>`).join('')}${isAdmin()?`<td class="fee-row-actions"><button class="btn secondary" type="button" onclick="openFeeRowEditor('${attr(dep.id)}','${attr(row.id)}')">Edit</button><button class="btn danger" type="button" onclick="deleteFeeRow('${attr(row.id)}')">Delete</button></td>`:''}</tr>`}).join('')||`<tr><td colspan="${cols.length+1+(isAdmin()?1:0)}" class="empty">No courses added</td></tr>`}</tbody></table></div></section>`
+ }).filter(Boolean);
+ host.innerHTML=sections.join('')||(query?'<p class="empty">No matching fee records found</p>':'<p class="empty">No active departments</p>')
+}
+const feeSearchInput=$('#feeSearch');if(feeSearchInput)feeSearchInput.addEventListener('input',()=>renderFeeBuilder());
 window.addFeeDepartment=async()=>{if(!isAdmin())return;const name=prompt('Department / Faculty name');if(!name?.trim())return;const max=Math.max(0,...(S.feeDepartments||[]).map(x=>Number(x.sort_order)||0));const {error}=await db.from('crm_university_fee_departments').insert({name:name.trim(),sort_order:max+10});if(error)toast(error.message);else{toast('Department added');loadFeeBuilder()}}
 window.editFeeDepartment=async id=>{if(!isAdmin())return;const x=(S.feeDepartments||[]).find(x=>x.id===id);if(!x)return;const name=prompt('Department / Faculty name',x.name);if(!name?.trim())return;const order=prompt('Sort order',String(x.sort_order??100));if(order===null)return;const {error}=await db.from('crm_university_fee_departments').update({name:name.trim(),sort_order:Number(order)||100}).eq('id',id);if(error)toast(error.message);else loadFeeBuilder()}
 window.deleteFeeDepartment=async id=>{if(!isAdmin()||!confirm('Department aur iske saare course rows delete karein?'))return;const {error}=await db.from('crm_university_fee_departments').delete().eq('id',id);if(error)toast(error.message);else{toast('Department deleted');loadFeeBuilder()}}
