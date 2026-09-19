@@ -974,6 +974,34 @@ body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline
 .university-detail-note{margin:0;color:var(--muted);line-height:1.6}
 @media(max-width:680px){.university-detail-tabs{width:100%}.university-detail-tab{flex:1 1 100%;text-align:left}}
 
+
+
+/* Dynamic university fee builder */
+.fee-admin-tools{display:none;margin:14px 0;padding:14px;background:#f8fbff;border:1px solid #d6e4f4;border-radius:12px}
+body:not(.staff-role) .fee-admin-tools{display:block}
+.fee-admin-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fee-admin-actions .btn{padding:8px 12px}
+.fee-column-manager{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.fee-column-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #d5e2ef;background:#fff;border-radius:9px;padding:7px 9px;font-size:12px;color:#31516d}
+.fee-column-chip.inactive{opacity:.55}
+.fee-column-chip button{border:0;background:#edf4ff;color:#2457a6;border-radius:6px;padding:4px 6px;cursor:pointer}
+.fee-department{margin:18px 0 0;background:#fff;border:1px solid #d6e3f0;border-radius:13px;overflow:hidden}
+.fee-department-head{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:13px 15px;background:#edf5ff;border-bottom:1px solid #d8e5f2}
+.fee-department-head h3{margin:0;color:#173f6c;font-size:15px}
+.fee-department-actions{display:flex;gap:6px;flex-wrap:wrap}
+.fee-department-actions .btn{padding:6px 9px;font-size:12px}
+.fee-data-wrap{overflow:auto}
+.fee-data-table{width:100%;border-collapse:collapse;min-width:900px;white-space:normal}
+.fee-data-table th{position:sticky;top:0;background:#f5f9ff;color:#2457a6;border-bottom:1px solid #d5e2ef;padding:10px;font-size:12px;white-space:nowrap}
+.fee-data-table td{padding:10px;border-bottom:1px solid #e2eaf3;vertical-align:top;font-size:13px}
+.fee-data-table td.fee-currency{white-space:nowrap;font-weight:700;color:#244f7e}
+.fee-row-actions{white-space:nowrap}
+.fee-row-actions .btn{padding:5px 7px;font-size:11px;margin-right:4px}
+.fee-builder-note{margin:8px 0 0;color:#6b7f95;font-size:12px;line-height:1.5}
+.fee-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.fee-modal-grid .full{grid-column:1/-1}
+.fee-modal-grid .field{margin:0}.fee-modal-grid textarea{width:100%;min-height:82px;padding:10px;border:1px solid #cbd9e8;border-radius:8px}
+@media(max-width:680px){.fee-modal-grid{grid-template-columns:1fr}.fee-modal-grid .full{grid-column:auto}.fee-department-head{align-items:flex-start;flex-direction:column}}
+
 </style>
 </head>
 <body>
@@ -1148,8 +1176,13 @@ body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline
     <button type="button" class="university-detail-tab active" data-university-tab="info">University Info</button>
   </div>
   <section class="card university-detail-panel" data-university-panel="fee">
-    <h2>Fee Detail</h2>
-    <p class="university-detail-note">Fee structure aur fee details yahan show hongi. Actual fee data add hone ke baad isi section mein rakha jayega.</p>
+    <div class="toolbar"><div><h2>Fee Detail</h2><p class="university-detail-note">Admin ke saved departments, columns, calculations aur courses yahan live dikhte hain.</p></div><button id="refreshFeeBuilder" class="btn secondary" type="button">Refresh</button></div>
+    <div id="feeAdminTools" class="fee-admin-tools admin-only">
+      <div class="fee-admin-actions"><button id="addFeeDepartment" class="btn primary" type="button">+ Department</button><button id="addFeeColumn" class="btn secondary" type="button">+ Column</button></div>
+      <p class="fee-builder-note">Formula example: <b>fees_per_year * year</b> or <b>total * 0.4</b>. Column Key formula mein use hota hai.</p>
+      <div id="feeColumnManager" class="fee-column-manager"></div>
+    </div>
+    <div id="feeBuilderHost"><p class="empty">Fee details loading...</p></div>
   </section>
   <section class="card university-detail-panel" data-university-panel="approval">
     <h2>Approval</h2>
@@ -1581,6 +1614,30 @@ document.querySelectorAll('[data-university-tab]').forEach(btn=>{
     document.querySelectorAll('[data-university-panel]').forEach(x=>x.classList.toggle('active',x.dataset.universityPanel===mode));
   });
 });
+
+
+
+/* Dynamic university fee builder */
+function feeNumber(v){const n=Number(String(v??'').replace(/,/g,'').trim());return Number.isFinite(n)?n:0}
+function feeFormulaTokens(expr){const s=String(expr||'').trim(),out=[];let i=0;while(i<s.length){const c=s[i];if(/\s/.test(c)){i++;continue}if(/[()+\-*/]/.test(c)){out.push(c);i++;continue}if(/[0-9.]/.test(c)){let j=i+1;while(j<s.length&&/[0-9.]/.test(s[j]))j++;const raw=s.slice(i,j);if(!/^\d*\.?\d+$/.test(raw))throw new Error('Invalid number');out.push(Number(raw));i=j;continue}if(/[A-Za-z_]/.test(c)){let j=i+1;while(j<s.length&&/[A-Za-z0-9_]/.test(s[j]))j++;out.push({key:s.slice(i,j)});i=j;continue}throw new Error('Formula mein invalid character hai')}return out}
+function feeEvalFormula(expr,row){if(!expr)return null;try{const t=feeFormulaTokens(expr);let i=0;const primary=()=>{const x=t[i++];if(x==='('){const v=add();if(t[i++]!==')')throw 0;return v}if(typeof x==='number')return x;if(x&&x.key)return feeNumber(row[x.key]);if(x==='-')return-primary();throw 0},mul=()=>{let v=primary();while(t[i]==='*'||t[i]==='/'){const op=t[i++],r=primary();v=op==='*'?v*r:(r?v/r:0)}return v},add=()=>{let v=mul();while(t[i]==='+'||t[i]==='-'){const op=t[i++],r=mul();v=op==='+'?v+r:v-r}return v};const v=add();if(i!==t.length||!Number.isFinite(v))return null;return Math.round((v+Number.EPSILON)*100)/100}catch{return null}}
+function feeResolvedRow(row,columns){const data={...(row.row_data||{})};columns.filter(c=>c.formula).forEach(()=>columns.filter(c=>c.formula).forEach(c=>{const v=feeEvalFormula(c.formula,data);if(v!==null)data[c.column_key]=v}));return data}
+function feeDisplayValue(col,val){if(val===null||val===undefined||val==='')return '—';if(col.value_type==='currency')return '₹'+feeNumber(val).toLocaleString('en-IN',{maximumFractionDigits:2});if(col.value_type==='number')return feeNumber(val).toLocaleString('en-IN',{maximumFractionDigits:2});return esc(String(val))}
+async function loadFeeBuilder(){const host=$('#feeBuilderHost');if(!host)return;host.innerHTML='<p class="empty">Fee details loading...</p>';const [d,c,r]=await Promise.all([db.from('crm_university_fee_departments').select('*').order('sort_order').order('name'),db.from('crm_university_fee_columns').select('*').order('sort_order').order('label'),db.from('crm_university_fee_rows').select('*').order('sort_order')]);const error=d.error||c.error||r.error;if(error){host.innerHTML='<p class="empty">Fee details load nahi hui</p>';toast(error.message);return}S.feeDepartments=d.data||[];S.feeColumns=c.data||[];S.feeRows=r.data||[];renderFeeBuilder()}
+function renderFeeBuilder(){const host=$('#feeBuilderHost'),allCols=S.feeColumns||[],cols=allCols.filter(x=>x.active),deps=(S.feeDepartments||[]).filter(x=>x.active);const manager=$('#feeColumnManager');if(manager&&isAdmin())manager.innerHTML=allCols.map(c=>`<span class="fee-column-chip ${c.active?'':'inactive'}"><b>${esc(c.label)}</b><small>${esc(c.column_key)}${c.formula?' = '+esc(c.formula):''}</small><button type="button" onclick="editFeeColumn('${attr(c.id)}')">Edit</button><button type="button" onclick="toggleFeeColumn('${attr(c.id)}',${!c.active})">${c.active?'Hide':'Show'}</button><button type="button" onclick="deleteFeeColumn('${attr(c.id)}')">×</button></span>`).join('')||'<span class="fee-builder-note">No columns</span>';host.innerHTML=deps.map(dep=>{const rows=(S.feeRows||[]).filter(x=>x.department_id===dep.id&&x.active);return `<section class="fee-department"><div class="fee-department-head"><h3>${esc(dep.name)}</h3>${isAdmin()?`<div class="fee-department-actions"><button class="btn primary" type="button" onclick="openFeeRowEditor('${attr(dep.id)}')">+ Course</button><button class="btn secondary" type="button" onclick="editFeeDepartment('${attr(dep.id)}')">Edit Department</button><button class="btn danger" type="button" onclick="deleteFeeDepartment('${attr(dep.id)}')">Delete</button></div>`:''}</div><div class="fee-data-wrap"><table class="fee-data-table"><thead><tr><th>S.No.</th>${cols.map(c=>`<th title="Key: ${attr(c.column_key)}${c.formula?' | Formula: '+attr(c.formula):''}">${esc(c.label)}</th>`).join('')}${isAdmin()?'<th>Action</th>':''}</tr></thead><tbody>${rows.map((row,i)=>{const data=feeResolvedRow(row,cols);return `<tr><td>${i+1}</td>${cols.map(c=>`<td class="${c.value_type==='currency'?'fee-currency':''}">${feeDisplayValue(c,data[c.column_key])}</td>`).join('')}${isAdmin()?`<td class="fee-row-actions"><button class="btn secondary" type="button" onclick="openFeeRowEditor('${attr(dep.id)}','${attr(row.id)}')">Edit</button><button class="btn danger" type="button" onclick="deleteFeeRow('${attr(row.id)}')">Delete</button></td>`:''}</tr>`}).join('')||`<tr><td colspan="${cols.length+1+(isAdmin()?1:0)}" class="empty">No courses added</td></tr>`}</tbody></table></div></section>`}).join('')||'<p class="empty">No active departments</p>'}
+window.addFeeDepartment=async()=>{if(!isAdmin())return;const name=prompt('Department / Faculty name');if(!name?.trim())return;const max=Math.max(0,...(S.feeDepartments||[]).map(x=>Number(x.sort_order)||0));const {error}=await db.from('crm_university_fee_departments').insert({name:name.trim(),sort_order:max+10});if(error)toast(error.message);else{toast('Department added');loadFeeBuilder()}}
+window.editFeeDepartment=async id=>{if(!isAdmin())return;const x=(S.feeDepartments||[]).find(x=>x.id===id);if(!x)return;const name=prompt('Department / Faculty name',x.name);if(!name?.trim())return;const order=prompt('Sort order',String(x.sort_order??100));if(order===null)return;const {error}=await db.from('crm_university_fee_departments').update({name:name.trim(),sort_order:Number(order)||100}).eq('id',id);if(error)toast(error.message);else loadFeeBuilder()}
+window.deleteFeeDepartment=async id=>{if(!isAdmin()||!confirm('Department aur iske saare course rows delete karein?'))return;const {error}=await db.from('crm_university_fee_departments').delete().eq('id',id);if(error)toast(error.message);else{toast('Department deleted');loadFeeBuilder()}}
+window.addFeeColumn=async()=>{if(!isAdmin())return;const label=prompt('Column label (e.g. Exam Fee)');if(!label?.trim())return;const suggested=label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').replace(/^[^a-z]+/,'')||'column';const key=prompt('Column Key (formula mein use hoga)',suggested);if(!key||!/^[a-z][a-z0-9_]*$/.test(key)){toast('Column key lowercase letters/numbers/underscore mein hona chahiye');return}const type=(prompt('Type: text / number / currency','text')||'text').toLowerCase();if(!['text','number','currency'].includes(type)){toast('Type invalid');return}const formula=prompt('Formula (optional). Example: fees_per_year * year','')||null;const max=Math.max(0,...(S.feeColumns||[]).map(x=>Number(x.sort_order)||0));const {error}=await db.from('crm_university_fee_columns').insert({column_key:key,label:label.trim(),value_type:type,formula:formula?.trim()||null,sort_order:max+10});if(error)toast(error.message);else{toast('Column added');loadFeeBuilder()}}
+window.editFeeColumn=async id=>{if(!isAdmin())return;const x=(S.feeColumns||[]).find(x=>x.id===id);if(!x)return;const label=prompt('Column label',x.label);if(!label?.trim())return;const type=(prompt('Type: text / number / currency',x.value_type)||x.value_type).toLowerCase();if(!['text','number','currency'].includes(type)){toast('Type invalid');return}const formula=prompt('Formula (blank = manual value)',x.formula||'');if(formula===null)return;const order=prompt('Sort order',String(x.sort_order??100));if(order===null)return;const {error}=await db.from('crm_university_fee_columns').update({label:label.trim(),value_type:type,formula:formula.trim()||null,sort_order:Number(order)||100}).eq('id',id);if(error)toast(error.message);else loadFeeBuilder()}
+window.toggleFeeColumn=async(id,active)=>{if(!isAdmin())return;const {error}=await db.from('crm_university_fee_columns').update({active}).eq('id',id);if(error)toast(error.message);else loadFeeBuilder()}
+window.deleteFeeColumn=async id=>{if(!isAdmin()||!confirm('Column delete karein? Purane row data JSON mein reh sakta hai, display se column hat jayega.'))return;const {error}=await db.from('crm_university_fee_columns').delete().eq('id',id);if(error)toast(error.message);else loadFeeBuilder()}
+function ensureFeeRowModal(){let m=$('#feeRowModal');if(m)return m;m=document.createElement('div');m.id='feeRowModal';m.className='modal-bg';m.innerHTML='<form id="feeRowForm" class="modal" style="width:min(900px,100%)"><div class="modal-head"><div><h2 id="feeRowModalTitle">Add Course</h2><p class="staff-form-note">Calculated columns formula se automatically niklenge.</p></div><button type="button" class="close" id="closeFeeRowModal">×</button></div><input type="hidden" name="row_id"><input type="hidden" name="department_id"><div id="feeRowFields" class="fee-modal-grid"></div><div class="modal-actions"><button type="button" class="btn secondary" id="cancelFeeRowModal">Cancel</button><button class="btn primary" type="submit">Save Course</button></div></form>';document.body.appendChild(m);const close=()=>m.classList.remove('open');$('#closeFeeRowModal').onclick=close;$('#cancelFeeRowModal').onclick=close;m.onclick=e=>{if(e.target===m)close()};$('#feeRowForm').onsubmit=saveFeeRow;return m}
+window.openFeeRowEditor=(departmentId,rowId='')=>{if(!isAdmin())return;const m=ensureFeeRowModal(),f=$('#feeRowForm'),row=(S.feeRows||[]).find(x=>x.id===rowId),cols=(S.feeColumns||[]).filter(x=>x.active&&!x.formula);f.elements.row_id.value=rowId;f.elements.department_id.value=departmentId;$('#feeRowModalTitle').textContent=rowId?'Edit Course':'Add Course';$('#feeRowFields').innerHTML=cols.map(c=>{const v=row?.row_data?.[c.column_key]??'',full=['specialization','eligibility'].includes(c.column_key);return `<label class="field ${full?'full':''}">${esc(c.label)}${full?`<textarea name="${attr(c.column_key)}">${esc(String(v))}</textarea>`:`<input name="${attr(c.column_key)}" ${c.value_type!=='text'?'inputmode="decimal"':''} value="${attr(String(v))}">`}<small>Key: ${esc(c.column_key)}</small></label>`}).join('');m.classList.add('open')}
+async function saveFeeRow(e){e.preventDefault();if(!isAdmin())return;const f=e.target,rowId=f.elements.row_id.value,departmentId=f.elements.department_id.value,data={};(S.feeColumns||[]).filter(x=>x.active&&!x.formula).forEach(c=>{const el=f.elements[c.column_key];if(!el)return;const raw=el.value.trim();data[c.column_key]=c.value_type==='text'?raw:(raw===''?'':feeNumber(raw))});let result;if(rowId)result=await db.from('crm_university_fee_rows').update({row_data:data}).eq('id',rowId);else{const rows=(S.feeRows||[]).filter(x=>x.department_id===departmentId),max=Math.max(0,...rows.map(x=>Number(x.sort_order)||0));result=await db.from('crm_university_fee_rows').insert({department_id:departmentId,row_data:data,sort_order:max+10})}if(result.error){toast(result.error.message);return}$('#feeRowModal').classList.remove('open');toast(rowId?'Course updated':'Course added');loadFeeBuilder()}
+window.deleteFeeRow=async id=>{if(!isAdmin()||!confirm('Course row delete karein?'))return;const {error}=await db.from('crm_university_fee_rows').delete().eq('id',id);if(error)toast(error.message);else{toast('Course deleted');loadFeeBuilder()}}
+$('#addFeeDepartment')?.addEventListener('click',addFeeDepartment);$('#addFeeColumn')?.addEventListener('click',addFeeColumn);$('#refreshFeeBuilder')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-university-tab="fee"]')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-page="universitydetail"]')?.addEventListener('click',()=>setTimeout(()=>{if(document.querySelector('[data-university-tab="fee"]')?.classList.contains('active'))loadFeeBuilder()},0));
+
 
 /* Staff University Detail new-tab behavior */
 (function(){
