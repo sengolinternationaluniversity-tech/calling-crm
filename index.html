@@ -1179,17 +1179,20 @@ body:not(.staff-role) .fee-admin-tools{display:block}
   <div class="heading"><div><h1>University Detail</h1><p>Sengol International University information.</p></div></div>
   <div class="university-detail-tabs" role="tablist" aria-label="University detail sections">
     <button type="button" class="university-detail-tab" data-university-tab="fee">Fee Detail</button>
+    <button type="button" class="university-detail-tab admin-only" data-university-tab="feesettings">Fee Settings</button>
     <button type="button" class="university-detail-tab" data-university-tab="approval">Approval</button>
     <button type="button" class="university-detail-tab active" data-university-tab="info">University Info</button>
   </div>
   <section class="card university-detail-panel" data-university-panel="fee">
-    <div class="toolbar"><div><h2>Fee Detail</h2><p class="university-detail-note">Admin ke saved departments, columns, calculations aur courses yahan live dikhte hain.</p></div><button id="refreshFeeBuilder" class="btn secondary" type="button">Refresh</button></div>
+    <div class="toolbar"><div><h2>Fee Detail</h2><p class="university-detail-note">Admin ke saved departments, columns, calculations aur courses yahan live dikhte hain.</p></div><div class="fee-admin-actions"><button id="addFeeDepartment" class="btn primary admin-only" type="button">+ Department</button><button id="refreshFeeBuilder" class="btn secondary" type="button">Refresh</button></div></div>
+    <div id="feeBuilderHost"><p class="empty">Fee details loading...</p></div>
+  </section>
+  <section class="card university-detail-panel admin-only" data-university-panel="feesettings">
+    <div class="toolbar"><div><h2>Fee Settings</h2><p class="university-detail-note">Columns aur calculations ko yahan manage karein. Yahan ki settings Fee Detail table par apply hongi.</p></div><button id="addFeeColumn" class="btn primary" type="button">+ Column</button></div>
     <div id="feeAdminTools" class="fee-admin-tools admin-only">
-      <div class="fee-admin-actions"><button id="addFeeDepartment" class="btn primary" type="button">+ Department</button><button id="addFeeColumn" class="btn secondary" type="button">+ Column</button></div>
       <p class="fee-builder-note">Formula example: <b>fees_per_year * year</b> or <b>total * 0.4</b>. Column Key formula mein use hota hai.</p>
       <div id="feeColumnManager" class="fee-column-manager"></div>
     </div>
-    <div id="feeBuilderHost"><p class="empty">Fee details loading...</p></div>
   </section>
   <section class="card university-detail-panel" data-university-panel="approval">
     <h2>Approval</h2>
@@ -1643,7 +1646,7 @@ function ensureFeeRowModal(){let m=$('#feeRowModal');if(m)return m;m=document.cr
 window.openFeeRowEditor=(departmentId,rowId='')=>{if(!isAdmin())return;const m=ensureFeeRowModal(),f=$('#feeRowForm'),row=(S.feeRows||[]).find(x=>x.id===rowId),cols=(S.feeColumns||[]).filter(x=>x.active&&!x.formula);f.elements.row_id.value=rowId;f.elements.department_id.value=departmentId;$('#feeRowModalTitle').textContent=rowId?'Edit Course':'Add Course';$('#feeRowFields').innerHTML=cols.map(c=>{const v=row?.row_data?.[c.column_key]??'',full=['specialization','eligibility'].includes(c.column_key);return `<label class="field ${full?'full':''}">${esc(c.label)}${full?`<textarea name="${attr(c.column_key)}">${esc(String(v))}</textarea>`:`<input name="${attr(c.column_key)}" ${c.value_type!=='text'?'inputmode="decimal"':''} value="${attr(String(v))}">`}<small>Key: ${esc(c.column_key)}</small></label>`}).join('');m.classList.add('open')}
 async function saveFeeRow(e){e.preventDefault();if(!isAdmin())return;const f=e.target,rowId=f.elements.row_id.value,departmentId=f.elements.department_id.value,data={};(S.feeColumns||[]).filter(x=>x.active&&!x.formula).forEach(c=>{const el=f.elements[c.column_key];if(!el)return;const raw=el.value.trim();data[c.column_key]=c.value_type==='text'?raw:(raw===''?'':feeNumber(raw))});let result;if(rowId)result=await db.from('crm_university_fee_rows').update({row_data:data}).eq('id',rowId);else{const rows=(S.feeRows||[]).filter(x=>x.department_id===departmentId),max=Math.max(0,...rows.map(x=>Number(x.sort_order)||0));result=await db.from('crm_university_fee_rows').insert({department_id:departmentId,row_data:data,sort_order:max+10})}if(result.error){toast(result.error.message);return}$('#feeRowModal').classList.remove('open');toast(rowId?'Course updated':'Course added');loadFeeBuilder()}
 window.deleteFeeRow=async id=>{if(!isAdmin()||!confirm('Course row delete karein?'))return;const {error}=await db.from('crm_university_fee_rows').delete().eq('id',id);if(error)toast(error.message);else{toast('Course deleted');loadFeeBuilder()}}
-$('#addFeeDepartment')?.addEventListener('click',addFeeDepartment);$('#addFeeColumn')?.addEventListener('click',addFeeColumn);$('#refreshFeeBuilder')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-university-tab="fee"]')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-page="universitydetail"]')?.addEventListener('click',()=>setTimeout(()=>{if(document.querySelector('[data-university-tab="fee"]')?.classList.contains('active'))loadFeeBuilder()},0));
+$('#addFeeDepartment')?.addEventListener('click',addFeeDepartment);$('#addFeeColumn')?.addEventListener('click',addFeeColumn);$('#refreshFeeBuilder')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-university-tab="fee"]')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-university-tab="feesettings"]')?.addEventListener('click',loadFeeBuilder);document.querySelector('[data-page="universitydetail"]')?.addEventListener('click',()=>setTimeout(()=>{if(document.querySelector('[data-university-tab="fee"]')?.classList.contains('active'))loadFeeBuilder()},0));
 
 
 /* Staff University Detail new-tab behavior */
