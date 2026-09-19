@@ -1,0 +1,29 @@
+name: One-time blue white theme
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-blue-white-theme.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply blue white theme
+        run: python .github/scripts/apply_blue_white_theme.py
+      - name: Commit theme change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Apply blue white theme to admin and staff"
+            git push origin main
+          fi
