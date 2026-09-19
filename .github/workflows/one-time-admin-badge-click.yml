@@ -1,0 +1,29 @@
+name: One-time admin badge click
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-admin-badge-click.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Make Admin badge clickable
+        run: python .github/scripts/make_admin_badge_clickable.py
+      - name: Commit Admin badge click
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Make Admin top badge open dashboard"
+            git push origin main
+          fi
