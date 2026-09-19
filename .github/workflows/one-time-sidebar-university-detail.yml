@@ -1,0 +1,25 @@
+name: One-time sidebar university detail
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-sidebar-university-detail.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add university detail to sidebar
+        run: python3 .github/scripts/add_sidebar_university_detail.py
+      - name: Commit sidebar university detail
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Add university detail to admin and staff sidebar"
+          git push
