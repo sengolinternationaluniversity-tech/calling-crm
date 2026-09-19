@@ -961,6 +961,19 @@ body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline
 
 
 
+
+
+/* University detail tabs */
+.university-detail-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 14px;padding:8px;background:#f4f8ff;border:1px solid #d7e5f6;border-radius:12px;width:max-content;max-width:100%}
+.university-detail-tab{border:1px solid #c8d9ee;background:#fff;color:#31577f;padding:10px 17px;border-radius:9px;font-weight:800;cursor:pointer;transition:.15s ease}
+.university-detail-tab:hover{background:#edf5ff;border-color:#9fbfe3}
+.university-detail-tab.active{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 4px 12px #2563eb24}
+.university-detail-panel{display:none;margin-top:0;min-height:150px;padding:22px}
+.university-detail-panel.active{display:block}
+.university-detail-panel h2{margin:0 0 8px;color:#173f6c}
+.university-detail-note{margin:0;color:var(--muted);line-height:1.6}
+@media(max-width:680px){.university-detail-tabs{width:100%}.university-detail-tab{flex:1 1 100%;text-align:left}}
+
 </style>
 </head>
 <body>
@@ -1129,10 +1142,23 @@ body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline
 <!-- University Detail page -->
 <section id="universitydetailPage" class="page">
   <div class="heading"><div><h1>University Detail</h1><p>Sengol International University information.</p></div></div>
-  <article class="card university-detail-page-card">
-    <h2 style="margin:0 0 6px">Sengol International University</h2>
-    <p style="margin:0;color:var(--muted)">Admissions &amp; Outreach CRM</p>
-  </article>
+  <div class="university-detail-tabs" role="tablist" aria-label="University detail sections">
+    <button type="button" class="university-detail-tab" data-university-tab="fee">Fee Detail</button>
+    <button type="button" class="university-detail-tab" data-university-tab="approval">Approval</button>
+    <button type="button" class="university-detail-tab active" data-university-tab="info">University Info</button>
+  </div>
+  <section class="card university-detail-panel" data-university-panel="fee">
+    <h2>Fee Detail</h2>
+    <p class="university-detail-note">Fee structure aur fee details yahan show hongi. Actual fee data add hone ke baad isi section mein rakha jayega.</p>
+  </section>
+  <section class="card university-detail-panel" data-university-panel="approval">
+    <h2>Approval</h2>
+    <p class="university-detail-note">University approvals aur recognition details yahan show hongi. Verified approval data add hone ke baad isi section mein rakha jayega.</p>
+  </section>
+  <section class="card university-detail-panel active" data-university-panel="info">
+    <h2>Sengol International University</h2>
+    <p class="university-detail-note">Admissions &amp; Outreach CRM</p>
+  </section>
 </section>
 
 <section id="settingsPage" class="page"><div class="heading"><div><h1>Settings</h1><p>Calling CRM account और system settings.</p></div></div><div class="card"><h2>Account</h2><p><b>Logged-in user:</b> <span id="settingsEmail">—</span></p><p><b>Access:</b> Supabase secure authentication</p><p style="color:#68758b">Staff management केवल Admin के लिए उपलब्ध है।</p></div></section>
@@ -1544,6 +1570,17 @@ const staffGridSource=document.getElementById('staffGrid');
 if(staffGridSource)new MutationObserver(()=>renderAdminStaffExcelTable()).observe(staffGridSource,{childList:true,subtree:true,characterData:true});
 document.querySelector('[data-page="staff"]')?.addEventListener('click',()=>setTimeout(renderAdminStaffExcelTable,0));
 
+
+
+
+// University detail internal tabs
+document.querySelectorAll('[data-university-tab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const mode=btn.dataset.universityTab;
+    document.querySelectorAll('[data-university-tab]').forEach(x=>x.classList.toggle('active',x===btn));
+    document.querySelectorAll('[data-university-panel]').forEach(x=>x.classList.toggle('active',x.dataset.universityPanel===mode));
+  });
+});
 
 /* Staff University Detail new-tab behavior */
 (function(){
