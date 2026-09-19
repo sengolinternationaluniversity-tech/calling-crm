@@ -1,0 +1,25 @@
+name: One-time university detail button
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-university-detail-button.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace sidebar university card with button
+        run: python3 .github/scripts/replace_sidebar_university_card_with_button.py
+      - name: Commit university detail button
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Replace sidebar university card with University Detail button"
+          git push
