@@ -952,6 +952,13 @@ body:not(.staff-role) .top .top-master-btn:hover{
   border-color:#b8cfea;
 }
 
+
+
+/* Clickable Admin top badge */
+body:not(.staff-role) #roleBadge{cursor:pointer;user-select:none;transition:background .15s ease,border-color .15s ease}
+body:not(.staff-role) #roleBadge:hover{background:#dfeaff;border-color:#a9c5ea}
+body:not(.staff-role) #roleBadge:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+
 </style>
 </head>
 <body>
@@ -1137,6 +1144,7 @@ const S={user:null,profile:null,staff:[],page:1,size:50,total:0,search:'',staffI
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const sidebarToggle=$('#sidebarToggle');if(sidebarToggle)sidebarToggle.onclick=()=>{const hidden=document.body.classList.toggle('sidebar-hidden');sidebarToggle.setAttribute('aria-expanded',String(!hidden));sidebarToggle.setAttribute('aria-label',hidden?'Show sidebar':'Hide sidebar')};
 const topMasterBtn=$('#topMasterBtn');if(topMasterBtn)topMasterBtn.onclick=()=>{$$('.page').forEach(x=>x.classList.remove('active'));$('#masterPage').classList.add('active');$$('[data-page]').forEach(x=>x.classList.remove('active'));const context=$('#topContextTitle'),topTabs=$('#topInstituteTabs');if(context)context.classList.add('hidden');if(topTabs)topTabs.classList.add('hidden')};
+const topAdminBadge=$('#roleBadge');if(topAdminBadge){topAdminBadge.setAttribute('tabindex','0');topAdminBadge.setAttribute('role','button');topAdminBadge.onclick=()=>{if(!isAdmin())return;document.querySelector('[data-page=\"dashboard\"]')?.click()};topAdminBadge.onkeydown=e=>{if(!isAdmin())return;if(e.key==='Enter'||e.key===' '){e.preventDefault();document.querySelector('[data-page=\"dashboard\"]')?.click()}};}
 function bindSectionToggle(buttonId,targetId,label){const button=document.getElementById(buttonId),target=document.getElementById(targetId);if(!button||!target)return;button.onclick=()=>{const collapsed=target.classList.toggle('section-collapsed');button.textContent=collapsed?'▾':'▴';button.setAttribute('aria-expanded',String(!collapsed));button.setAttribute('aria-label',(collapsed?'Show ':'Hide ')+label)}}
 bindSectionToggle('toggleMasterSummary','masterSummary','master summary');bindSectionToggle('toggleFilters','filterTools','filters');
 function toast(m){$('#toast').textContent=m;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2500)}
