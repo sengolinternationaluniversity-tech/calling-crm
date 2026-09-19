@@ -1,0 +1,25 @@
+name: One-time approval uploads
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-approval-uploads.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add approval uploads
+        run: python3 .github/scripts/add_approval_uploads.py
+      - name: Commit approval uploads
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Add approval upload table"
+          git push
