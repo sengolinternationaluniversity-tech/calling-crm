@@ -1,0 +1,25 @@
+name: One-time strengthen fee horizontal lines
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-strengthen-fee-horizontal-lines.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Strengthen fee horizontal lines
+        run: python3 .github/scripts/strengthen_fee_horizontal_lines.py
+      - name: Commit fee horizontal lines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Strengthen horizontal lines in fee table"
+          git push
