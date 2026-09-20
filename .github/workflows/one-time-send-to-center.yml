@@ -1,0 +1,32 @@
+name: One-time Send to Center
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-send-to-center.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply Send to Center patch
+        run: python .github/scripts/patch_send_to_center.py
+      - name: Verify patch
+        run: |
+          grep -q 'function openSendToCenter' index.html
+          grep -q 'Share PDF + Message' index.html
+          grep -q 'jspdf@2.5.2' index.html
+          git diff --check
+      - name: Commit patch
+        run: |
+          git config user.name 'SENGOL INTERNATIONAL UNIVERSITY'
+          git config user.email 'sengolinternationaluniversity@gmail.com'
+          git add index.html
+          git commit -m 'Add template and fee PDF Send to Center flow'
+          git push origin main
