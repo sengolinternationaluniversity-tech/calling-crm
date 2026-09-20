@@ -1,0 +1,36 @@
+name: One-time Restore WhatsApp Template
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-restore-whatsapp-template.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Restore WhatsApp Template frontend only
+        run: |
+          git show 5089ca42a1b33e047a7eb6a58be458e3a2f4db74:index.html > index.html
+      - name: Verify desired state
+        run: |
+          grep -q 'data-university-tab="messages"' index.html
+          grep -q 'crm_university_message_templates' index.html
+          grep -q 'openMessageTemplateEditor' index.html
+          ! grep -q 'openSendToCenter' index.html
+          ! grep -q 'shareSendCenter' index.html
+          git diff --check
+      - name: Commit restore
+        run: |
+          git config user.name 'SENGOL INTERNATIONAL UNIVERSITY'
+          git config user.email 'sengolinternationaluniversity@gmail.com'
+          git add index.html
+          git commit -m 'Restore WhatsApp Template tab only'
+          git push origin main
