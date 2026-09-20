@@ -19,8 +19,8 @@ jobs:
         run: python .github/scripts/patch_send_to_center.py
       - name: Verify patch
         run: |
-          grep -q 'function openSendToCenter' index.html
-          grep -q 'Share PDF + Message' index.html
+          grep -q 'window.openSendToCenter' index.html
+          grep -q 'WhatsApp / Share PDF + Message' index.html
           grep -q 'jspdf@2.5.2' index.html
           git diff --check
       - name: Commit patch
