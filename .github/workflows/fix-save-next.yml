@@ -1,0 +1,25 @@
+name: Fix Save Next
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/fix-save-next.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace("const statusMeta=S.callStatuses.find(x=>x.name===status),follow=statusMeta?statusMeta.requires_follow_up:['Follow Up','Call Back Later'].includes(status);if(follow&&!rawNext){toast('Follow-up date choose karein');return}const nextCallAt=follow?followUpDateIso(rawNext):null;if(follow&&!nextCallAt){toast('Date DD/MM/YYYY format mein likhein');return}","const statusMeta=S.callStatuses.find(x=>x.name===status),statusKey=String(status||'').trim().toLowerCase(),follow=statusKey==='interested'?false:(statusMeta?statusMeta.requires_follow_up:['follow up','call back later'].includes(statusKey));if(follow&&!rawNext){toast('Follow-up date choose karein');form.elements.next_call_at?.focus();return}const nextCallAt=rawNext?followUpDateIso(rawNext):null;if(rawNext&&!nextCallAt){toast('Date DD/MM/YYYY format mein likhein');form.elements.next_call_at?.focus();return}",1)
+          p.write_text(s)
+          PY
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add index.html
+          git commit -m 'Fix Save Status & Next'
+          git push
