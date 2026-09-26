@@ -46,6 +46,14 @@ jobs:
           </style>'''
               s = s.replace('</head>', css + '\n</head>', 1)
 
+          if 'mobile-role-menu-fix-v1' not in s:
+              role_css = '''<style id="mobile-role-menu-fix-v1">
+          @media(max-width:760px){
+            .side.mobile-nav-open .nav button.hidden{display:none!important}
+          }
+          </style>'''
+              s = s.replace('</head>', role_css + '\n</head>', 1)
+
           if 'mobile-header-safe-script-v3' not in s:
               js = '''<script id="mobile-header-safe-script-v3">
           (function(){
@@ -79,5 +87,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Hide mobile nav search and account area behind buttons'
+          git commit -m 'Match mobile menu to web staff permissions'
           git push
