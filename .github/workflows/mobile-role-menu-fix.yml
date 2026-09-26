@@ -1,0 +1,46 @@
+name: Fix Mobile Role Menu
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mobile-role-menu-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep mobile menu same as web role permissions
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          style_id = 'mobile-role-menu-visibility-v1'
+          s = re.sub(r'<style id="' + style_id + r'">.*?</style>', '', s, flags=re.S)
+          css = '''<style id="mobile-role-menu-visibility-v1">
+@media (max-width:760px){
+  /* Respect the exact same role visibility as desktop/web. */
+  .side.mobile-nav-open .nav button.hidden{display:none!important}
+}
+</style>'''
+          if '</head>' not in s:
+              raise SystemExit('head closing tag not found')
+          s = s.replace('</head>', css + '\n</head>', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          if git diff --quiet -- index.html; then exit 0; fi
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add index.html
+          git commit -m 'Match mobile menu options to web staff permissions'
+          git push
