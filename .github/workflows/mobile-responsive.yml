@@ -1,4 +1,4 @@
-name: Apply Mobile Responsive UI
+name: Add Calling Location State Editing
 on:
   push:
     paths:
@@ -11,104 +11,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add mobile-only responsive CSS
+      - name: Patch staff calling location and state
         shell: bash
         run: |
           python3 <<'PY'
           from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          marker = '/* MOBILE-FIRST-CRM-V1 */'
-          if marker in s:
-              print('Mobile CSS already exists')
-              raise SystemExit(0)
-          css = r'''/* MOBILE-FIRST-CRM-V1 */
-          @media (max-width:768px){
-            html,body{max-width:100%;overflow-x:hidden}
-            body{font-size:14px}
-            .side{position:static!important;inset:auto!important;width:100%!important;min-height:auto!important;padding:10px!important;box-shadow:none!important}
-            .main{margin-left:0!important;width:100%!important}
-            .brand{padding:2px 6px 10px!important;font-size:18px!important;gap:8px!important}
-            .brand:before{width:32px!important;height:32px!important}
-            .brand small{font-size:10px!important}
-            .nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
-            .nav button{padding:10px 5px!important;font-size:12px!important;text-align:center!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-            .nav button:before{display:block!important;width:auto!important;margin:0 auto 3px!important}
-            .userbox{margin-top:8px!important;padding:9px!important}
-            .top{height:auto!important;min-height:54px!important;padding:7px 10px!important;gap:7px!important;flex-wrap:wrap!important}
-            .top input{width:calc(100% - 52px)!important;max-width:none!important;padding:10px 12px!important}
-            .content{padding:10px!important;max-width:none!important}
-            .heading{margin-bottom:10px!important;gap:8px!important;flex-wrap:wrap!important}
-            .heading h1{font-size:23px!important}
-            .heading p{font-size:12px!important}
-            .card{margin-top:10px!important;padding:11px!important;border-radius:10px!important}
-            .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-            .stat{padding:13px!important;min-height:86px!important}
-            .stat:before{display:none!important}
-            .stat b{font-size:22px!important}
-            .quick-grid,.dashboard-grid,.lower-grid,.staff-grid{grid-template-columns:1fr!important;gap:8px!important}
-            .toolbar{gap:7px!important;align-items:stretch!important}
-            .filters{width:100%!important;display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
-            .filters input,.filters select,.toolbar select,.toolbar input{width:100%!important;min-width:0!important;min-height:42px!important}
-            .management-tools .filters{grid-template-columns:1fr!important}
-            .master-stats{grid-template-columns:1fr 1fr!important;gap:8px!important}
-            .action-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;width:100%!important}
-            .table-wrap,.institute-grid-wrap,.previous-call-table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;width:100%!important}
-            table{font-size:12px!important}
-            th,td{padding:8px!important}
-            .pager{justify-content:center!important;gap:6px!important;flex-wrap:wrap!important}
-            .modal-bg{padding:6px!important;align-items:end!important}
-            .modal{width:100%!important;max-width:none!important;max-height:94vh!important;border-radius:14px 14px 0 0!important;padding:15px!important}
-            .form-grid{grid-template-columns:1fr!important}
-            .form-grid .full{grid-column:auto!important}
-            input,select,textarea{font-size:16px;max-width:100%}
-            .btn,button{min-height:42px;touch-action:manipulation}
-            .call-page-tabs,.institute-tabs{overflow-x:auto!important;white-space:nowrap!important;-webkit-overflow-scrolling:touch!important}
-            #callingPage .call-toolbar{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
-            #callingPage .call-toolbar select,#callingPage .call-toolbar button{width:100%!important;min-width:0!important}
-            #callingPage #callQueueInfo{grid-column:1/-1!important;text-align:right!important;font-size:12px!important}
-            .call-title{display:grid!important;grid-template-columns:1fr auto!important;gap:7px!important;align-items:start!important}
-            .call-title input,.call-name-input{width:100%!important;min-width:0!important;font-size:18px!important;padding:9px!important}
-            .call-meta{grid-template-columns:1fr!important;gap:7px!important}
-            .call-meta input,.call-meta select{width:100%!important;min-width:0!important;padding:9px!important}
-            .call-inline-actions{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;padding-top:0!important}
-            .call-inline-actions .btn{width:100%!important}
-            .call-inline-quick{display:flex!important;gap:7px!important;flex-wrap:wrap!important}
-            .call-inline-quick .btn,.call-inline-quick a{flex:1!important;min-width:120px!important;text-align:center!important}
-            .call-form{display:grid!important;grid-template-columns:1fr!important}
-            .call-remarks-field{grid-column:auto!important}
-            .call-form textarea{width:100%!important;min-height:74px!important}
-            .call-log-actions{display:grid!important;grid-template-columns:76px 1fr 76px!important;gap:6px!important;width:100%!important}
-            .call-log-actions .btn{width:100%!important;padding:8px 5px!important;font-size:12px!important;white-space:nowrap!important}
-            .previous-call-table{min-width:650px!important}
-            .follow-tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:5px!important}
-            .report-filters,.status-date-filter{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
-            .history-tools,.history-date-filter{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important}
-            .call-history-table,.follow-table,.institute-data-table{min-width:900px!important}
-            .assign-panel.active{display:grid!important;grid-template-columns:1fr!important}
-            .assign-panel select{min-width:0!important;width:100%!important}
-            .selection-tools{display:grid!important;grid-template-columns:1fr 1fr!important}
-          }
-          @media (max-width:430px){
-            .nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-            #callingPage .call-toolbar{grid-template-columns:1fr!important}
-            #callingPage #callQueueInfo{grid-column:auto!important}
-            .call-log-actions{grid-template-columns:64px 1fr 64px!important}
-            .call-log-actions .btn{font-size:11px!important;padding:7px 2px!important}
-            .report-filters,.status-date-filter,.history-tools,.history-date-filter{grid-template-columns:1fr!important}
-            .action-row{grid-template-columns:1fr!important}
-          }
-          '''
-          if '</style>' not in s:
-              raise SystemExit('style closing tag not found')
-          s = s.replace('</style>', css + '\n</style>', 1)
-          p.write_text(s, encoding='utf-8')
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          old='<div><small>Location</small><input name="location" value="${attr(x.location||\'\')}" placeholder="-"></div><div><small>State</small><input name="state" value="${attr(x.state||\'\')}" placeholder="-" readonly aria-readonly="true"></div>'
+          new='<div><small>Location</small><input name="location" value="${attr(x.location||\'\')}" placeholder="Location add karein"></div><div><small>State</small><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${[...new Set((S.masterRows||[]).map(r=>String(r.state||\'\').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
+          if old not in s:
+              raise SystemExit('render state/location target not found')
+          s=s.replace(old,new,1)
+
+          old="async function saveCallDetails(e){e.preventDefault();const x=S.callRows[S.callIndex],f=e.target;if(!validateInterestedDetails(f,x))return;const payload={institute_name:$('#callInstituteName').value.trim()||null,owner_name:f.elements.owner_name.value.trim()||null,mobile_no:mergePhones('',f.elements.mobile_no.value)||null,whatsapp_no:mergePhones('',f.elements.whatsapp_no.value)||null,email_id:f.elements.email_id.value.trim()||null,location:f.elements.location.value.trim()||null};"
+          new="async function saveCallDetails(e){e.preventDefault();const x=S.callRows[S.callIndex],f=e.target;if(!validateInterestedDetails(f,x))return;const typedState=String(f.elements.state?.value||'').trim(),knownStates=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))],matchedState=typedState?knownStates.find(v=>v.toLowerCase()===typedState.toLowerCase()):'';if(typedState&&!matchedState){f.elements.state.classList.add('field-invalid');toast('State sirf existing list me se select karein');f.elements.state.focus();return}const payload={institute_name:$('#callInstituteName').value.trim()||null,owner_name:f.elements.owner_name.value.trim()||null,mobile_no:mergePhones('',f.elements.mobile_no.value)||null,whatsapp_no:mergePhones('',f.elements.whatsapp_no.value)||null,email_id:f.elements.email_id.value.trim()||null,location:f.elements.location.value.trim()||null,state:matchedState||null};"
+          if old not in s:
+              raise SystemExit('saveCallDetails target not found')
+          s=s.replace(old,new,1)
+
+          old="$('#callDetailsForm').addEventListener('input',e=>{e.target.classList?.remove('field-invalid');if(S.callDetailsUpdatedId===x.id)S.callDetailsUpdatedId=null;syncCallButtons()});"
+          new="$('#callDetailsForm').addEventListener('input',e=>{e.target.classList?.remove('field-invalid');if(S.callDetailsUpdatedId===x.id)S.callDetailsUpdatedId=null;syncCallButtons()});const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))],m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
+          if old not in s:
+              raise SystemExit('callDetails input listener target not found')
+          s=s.replace(old,new,1)
+
+          p.write_text(s,encoding='utf-8')
           PY
-      - name: Commit responsive UI
+      - name: Commit changes
         run: |
           if git diff --quiet -- index.html; then exit 0; fi
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Make CRM mobile responsive without changing data logic'
+          git commit -m 'Allow staff to edit location and pick searchable existing state'
           git push
