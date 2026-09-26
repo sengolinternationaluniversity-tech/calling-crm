@@ -1,4 +1,4 @@
-name: Mobile Calling Layout Fix
+name: Safe Mobile Header Menu
 on:
   push:
     paths:
@@ -11,107 +11,146 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Improve mobile calling UI only
+      - name: Add safe mobile header controls
         shell: bash
         run: |
           python3 <<'PY'
           from pathlib import Path
           import re
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          marker='mobile-calling-layout-v2'
-          s=re.sub(r'<style id="'+marker+r'">.*?</style>','',s,flags=re.S)
-          css=r'''<style id="mobile-calling-layout-v2">
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          style_id = 'mobile-header-menu-safe-v1'
+          script_id = 'mobile-header-menu-safe-script-v1'
+
+          s = re.sub(r'<style id="' + style_id + r'">.*?</style>', '', s, flags=re.S)
+          s = re.sub(r'<script id="' + script_id + r'">.*?</script>', '', s, flags=re.S)
+
+          css = r'''<style id="mobile-header-menu-safe-v1">
 @media (max-width:760px){
-  html,body{max-width:100%;overflow-x:hidden}
-  body{padding-bottom:76px;background:#f6f8fc}
+  body{padding-bottom:0!important}
   .main{margin-left:0!important;width:100%!important;min-width:0!important}
-  .content{padding:12px!important;max-width:100%!important}
 
-  /* compact mobile navigation at bottom */
-  .side{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;height:68px!important;min-height:68px!important;padding:5px 6px!important;background:#fff!important;border-top:1px solid #d8e1ee!important;box-shadow:0 -4px 18px #10243c14!important;z-index:999!important;display:block!important}
-  .side .brand,.side .userbox{display:none!important}
-  .side .nav{height:100%!important;display:flex!important;grid-template-columns:none!important;gap:2px!important;overflow-x:auto!important;overflow-y:hidden!important;align-items:stretch!important;scrollbar-width:none!important}
-  .side .nav::-webkit-scrollbar{display:none!important}
-  .side .nav button{flex:1 0 72px!important;min-width:72px!important;height:58px!important;padding:5px 3px!important;border-radius:10px!important;color:#59708a!important;text-align:center!important;font-size:11px!important;line-height:1.1!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;background:transparent!important}
-  .side .nav button:before{display:block!important;width:auto!important;margin:0!important;font-size:19px!important;line-height:1!important}
-  .side .nav button.active{background:#eaf2ff!important;color:#2167d7!important}
+  /* Only compact CRM header stays visible on mobile */
+  .side{
+    position:relative!important;inset:auto!important;width:100%!important;height:auto!important;min-height:0!important;
+    padding:10px 12px!important;background:#fff!important;color:#10243c!important;border:0!important;
+    border-bottom:1px solid #dbe4ef!important;box-shadow:0 2px 10px #10243c12!important;z-index:500!important;
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center!important;gap:8px!important
+  }
+  .side .brand{
+    display:flex!important;align-items:center!important;margin:0!important;padding:0!important;min-width:0!important;
+    color:#174f8d!important;font-size:19px!important
+  }
+  .side .brand:before{width:38px!important;height:38px!important;flex:0 0 38px!important;border-radius:11px!important}
+  .side .brand small{font-size:10px!important;margin-top:2px!important;color:#718096!important}
 
-  /* compact top search */
-  .top{position:sticky!important;top:0!important;z-index:100!important;height:60px!important;min-height:60px!important;padding:8px 10px!important;gap:8px!important;background:#fff!important}
-  .top input{width:100%!important;max-width:none!important;min-width:0!important;height:42px!important;padding:9px 13px!important;border:1px solid #d4deeb!important;border-radius:12px!important;background:#f8fafc!important;font-size:15px!important}
-  .top .role,.role{flex:0 0 auto!important;margin-left:0!important;padding:7px 10px!important;font-size:12px!important;white-space:nowrap!important}
-  .top-master-btn{display:none!important}
+  /* Red-marked large area stays hidden until a button is tapped */
+  .side .nav{display:none!important}
+  .side .userbox{display:none!important}
+  .top{display:none!important}
 
-  /* calling header */
-  body.staff-role #callingPage.active,#callingPage.active{display:block!important}
-  #callingPage>.heading{display:block!important;margin:4px 0 10px!important}
-  #callingPage>.heading h1{font-size:25px!important;line-height:1.1!important;margin:0!important}
-  #callingPage>.heading p{font-size:13px!important;line-height:1.35!important;margin:4px 0 0!important;color:#75839a!important}
+  #mobileNavToggle,#mobileUserToggle{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    height:40px!important;border:1px solid #cfdaea!important;border-radius:10px!important;
+    background:#f8fbff!important;color:#173a62!important;cursor:pointer!important
+  }
+  #mobileNavToggle{width:44px!important;padding:0!important;font-size:21px!important}
+  #mobileUserToggle{width:40px!important;padding:0!important;font-size:24px!important;line-height:1!important}
 
-  /* filters full width and compact */
-  #callingPage .call-toolbar{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;width:100%!important;margin:0 0 10px!important;padding:10px!important;border:1px solid #dbe4f0!important;border-radius:14px!important;background:#fff!important;box-shadow:none!important}
-  #callingPage .call-toolbar select,#callingPage .call-toolbar button{width:100%!important;min-width:0!important;height:42px!important;margin:0!important;border-radius:10px!important;font-size:14px!important}
-  #callingPage .call-toolbar button{grid-column:1/-1!important}
-  #callingPage #callQueueInfo{grid-column:1/-1!important;text-align:right!important;font-size:12px!important;line-height:1!important;margin:0!important;color:#64748b!important}
+  .side.mobile-nav-open .nav{
+    display:grid!important;position:absolute!important;left:10px!important;right:10px!important;top:62px!important;z-index:520!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding:9px!important;
+    background:#fff!important;border:1px solid #d7e1ed!important;border-radius:13px!important;
+    box-shadow:0 14px 34px #10243c26!important;max-height:70vh!important;overflow:auto!important
+  }
+  .side.mobile-nav-open .nav button{
+    width:100%!important;min-width:0!important;height:48px!important;padding:7px 10px!important;border-radius:9px!important;
+    background:#f8fafc!important;color:#46617d!important;text-align:left!important;font-size:13px!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important
+  }
+  .side.mobile-nav-open .nav button.active{background:#2f6de5!important;color:#fff!important}
+  .side.mobile-nav-open .nav button:before{display:inline-block!important;width:24px!important;margin:0!important;font-size:17px!important;text-align:center!important}
 
-  /* tabs */
-  #callingPage>.call-page-tabs{display:flex!important;gap:0!important;margin:0 0 10px!important;padding:0!important;overflow-x:auto!important;white-space:nowrap!important;border-bottom:1px solid #d8e0ea!important;background:transparent!important}
-  #callingPage .call-page-tab{flex:1 0 auto!important;min-width:92px!important;padding:10px 12px!important;font-size:14px!important;text-align:center!important}
+  .side.mobile-user-open .userbox{
+    display:block!important;position:absolute!important;right:10px!important;top:62px!important;z-index:530!important;
+    width:min(280px,calc(100vw - 20px))!important;margin:0!important;padding:12px!important;
+    background:#fff!important;color:#173a62!important;border:1px solid #d7e1ed!important;border-radius:13px!important;
+    box-shadow:0 14px 34px #10243c26!important
+  }
+  .side.mobile-user-open .userbox small{color:#718096!important;margin:4px 0 10px!important}
+  .side.mobile-user-open .userbox .btn{width:100%!important;min-height:42px!important;background:#fff!important;color:#173a62!important;border:1px solid #d5dfeb!important}
 
-  /* record card */
-  #callingPage #callingTabPanel>.card,#callingPage .call-page-panel>.card{margin:0!important;padding:12px!important;border-radius:14px!important;box-shadow:none!important}
-  #callRecord{width:100%!important;min-width:0!important}
-  .call-record{padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important}
-  .call-title{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;align-items:start!important;margin-bottom:10px!important}
-  .call-title input,.call-name-input{width:100%!important;min-width:0!important;font-size:17px!important;font-weight:700!important;height:44px!important}
-  .call-title>b{font-size:12px!important;padding-top:18px!important;white-space:nowrap!important}
-
-  .call-meta{display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
-  .call-meta>div{min-width:0!important;width:100%!important}
-  .call-meta small{display:block!important;margin-bottom:4px!important;font-size:12px!important}
-  .call-meta input,.call-meta select,.call-meta button,#callStateDropdownBtn{width:100%!important;min-width:0!important;height:43px!important;font-size:14px!important;border-radius:9px!important}
-  .call-inline-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;align-items:stretch!important}
-  .call-inline-actions>#callUpdateBtn{width:100%!important}
-  .call-inline-quick{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;width:100%!important}
-  .call-inline-quick .btn,.call-inline-quick a{width:100%!important;min-height:43px!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;white-space:normal!important}
-
-  .call-form{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;margin-top:10px!important}
-  .call-form .field{margin:0!important;gap:4px!important;font-size:12px!important}
-  .call-form input,.call-form select,.call-form textarea{width:100%!important;min-width:0!important;font-size:14px!important;border-radius:9px!important}
-  .call-form input,.call-form select{height:43px!important;padding:8px 10px!important}
-  .call-form textarea{min-height:82px!important;padding:9px 10px!important}
-  .call-remarks-field{grid-column:1!important}
-
-  /* action buttons: easy thumb reach */
-  .call-log-actions{position:sticky!important;bottom:74px!important;z-index:80!important;display:grid!important;grid-template-columns:78px minmax(0,1fr) 78px!important;gap:7px!important;width:100%!important;padding:8px!important;margin:2px -2px 0!important;background:#ffffffee!important;backdrop-filter:blur(6px)!important;border:1px solid #dbe4ef!important;border-radius:12px!important;box-shadow:0 5px 18px #10243c16!important}
-  .call-log-actions .btn{width:100%!important;min-width:0!important;min-height:44px!important;padding:7px 5px!important;font-size:12px!important;white-space:normal!important}
-  #callSaveNextBtn{font-size:13px!important;font-weight:700!important}
-
-  /* history */
-  .previous-call-history{margin-top:10px!important;border-radius:12px!important;overflow:hidden!important}
-  .previous-call-history summary{padding:11px!important;font-size:13px!important}
-  .previous-call-table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  .previous-call-table{min-width:680px!important;font-size:12px!important}
-
-  /* searchable state dropdown stays within screen */
-  #callStatePicker{width:100%!important}
-  #callStateDropdownMenu{position:absolute!important;left:0!important;right:0!important;width:100%!important;max-width:100%!important;z-index:200!important}
-  #callStateOptions{max-height:220px!important}
-
-  /* dialogs/forms */
-  .modal-bg{padding:8px!important}
-  .modal{width:100%!important;max-width:100%!important;max-height:94vh!important;padding:14px!important;border-radius:14px!important}
-  .form-grid{grid-template-columns:1fr!important}
-  .form-grid .full{grid-column:1!important}
-
-  /* generic tables do not break viewport */
-  .table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  table{max-width:none!important}
+  .content{padding-top:10px!important}
+}
+@media (min-width:761px){
+  #mobileNavToggle,#mobileUserToggle{display:none!important}
 }
 </style>'''
-          s=s.replace('</head>',css+'\n</head>',1)
-          p.write_text(s,encoding='utf-8')
+
+          if '</head>' not in s:
+              raise SystemExit('head closing tag not found')
+          s = s.replace('</head>', css + '\n</head>', 1)
+
+          js = r'''<script id="mobile-header-menu-safe-script-v1">
+(function(){
+  function initMobileHeader(){
+    var side=document.querySelector('.side');
+    if(!side || side.querySelector('#mobileNavToggle')) return;
+    var brand=side.querySelector('.brand');
+    var nav=side.querySelector('.nav');
+    var userbox=side.querySelector('.userbox');
+    if(!brand || !nav) return;
+
+    var menu=document.createElement('button');
+    menu.type='button';
+    menu.id='mobileNavToggle';
+    menu.textContent='☰';
+    menu.setAttribute('aria-label','Open menu');
+
+    var dots=document.createElement('button');
+    dots.type='button';
+    dots.id='mobileUserToggle';
+    dots.textContent='⋮';
+    dots.setAttribute('aria-label','Open account menu');
+
+    brand.insertAdjacentElement('afterend',menu);
+    menu.insertAdjacentElement('afterend',dots);
+
+    menu.addEventListener('click',function(e){
+      e.stopPropagation();
+      side.classList.toggle('mobile-nav-open');
+      side.classList.remove('mobile-user-open');
+    });
+    dots.addEventListener('click',function(e){
+      e.stopPropagation();
+      side.classList.toggle('mobile-user-open');
+      side.classList.remove('mobile-nav-open');
+    });
+    nav.addEventListener('click',function(e){
+      if(e.target.closest('button')) side.classList.remove('mobile-nav-open');
+    });
+    if(userbox) userbox.addEventListener('click',function(e){e.stopPropagation();});
+    document.addEventListener('click',function(e){
+      if(!side.contains(e.target)){
+        side.classList.remove('mobile-nav-open');
+        side.classList.remove('mobile-user-open');
+      }
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initMobileHeader);
+  else initMobileHeader();
+})();
+</script>'''
+
+          # IMPORTANT: insert before the real final body tag, never inside JS template strings.
+          if '</body>' not in s:
+              raise SystemExit('body closing tag not found')
+          head, tail = s.rsplit('</body>', 1)
+          s = head + js + '\n</body>' + tail
+
+          p.write_text(s, encoding='utf-8')
           PY
       - name: Commit changes
         run: |
@@ -119,5 +158,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Fix staff calling layout for mobile screens'
+          git commit -m 'Hide mobile nav account search behind menu controls'
           git push
