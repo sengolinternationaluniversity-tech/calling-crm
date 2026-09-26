@@ -1,4 +1,4 @@
-name: Add Calling Location State Editing
+name: Sync All Admin States To Staff Calling
 on:
   push:
     paths:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch staff calling location and state
+      - name: Patch staff state source
         shell: bash
         run: |
           python3 <<'PY'
@@ -19,23 +19,35 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
 
-          old='<div><small>Location</small><input name="location" value="${attr(x.location||\'\')}" placeholder="-"></div><div><small>State</small><input name="state" value="${attr(x.state||\'\')}" placeholder="-" readonly aria-readonly="true"></div>'
-          new='<div><small>Location</small><input name="location" value="${attr(x.location||\'\')}" placeholder="Location add karein"></div><div><small>State</small><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${[...new Set((S.masterRows||[]).map(r=>String(r.state||\'\').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
-          if old not in s:
-              raise SystemExit('render state/location target not found')
-          s=s.replace(old,new,1)
+          marker="async function loadAllCallStates(){"
+          if marker not in s:
+              anchor="function callQuery(){"
+              if anchor not in s:
+                  raise SystemExit('callQuery anchor not found')
+              fn="async function loadAllCallStates(){const {data,error}=await db.from('crm_state_options').select('state').order('state',{ascending:true});if(error){toast('State list load nahi hui: '+error.message);S.callStateOptions=[];return}S.callStateOptions=[...new Set((data||[]).map(x=>String(x.state||'').trim()).filter(Boolean))]}\n"
+              s=s.replace(anchor,fn+anchor,1)
 
-          old="async function saveCallDetails(e){e.preventDefault();const x=S.callRows[S.callIndex],f=e.target;if(!validateInterestedDetails(f,x))return;const payload={institute_name:$('#callInstituteName').value.trim()||null,owner_name:f.elements.owner_name.value.trim()||null,mobile_no:mergePhones('',f.elements.mobile_no.value)||null,whatsapp_no:mergePhones('',f.elements.whatsapp_no.value)||null,email_id:f.elements.email_id.value.trim()||null,location:f.elements.location.value.trim()||null};"
-          new="async function saveCallDetails(e){e.preventDefault();const x=S.callRows[S.callIndex],f=e.target;if(!validateInterestedDetails(f,x))return;const typedState=String(f.elements.state?.value||'').trim(),knownStates=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))],matchedState=typedState?knownStates.find(v=>v.toLowerCase()===typedState.toLowerCase()):'';if(typedState&&!matchedState){f.elements.state.classList.add('field-invalid');toast('State sirf existing list me se select karein');f.elements.state.focus();return}const payload={institute_name:$('#callInstituteName').value.trim()||null,owner_name:f.elements.owner_name.value.trim()||null,mobile_no:mergePhones('',f.elements.mobile_no.value)||null,whatsapp_no:mergePhones('',f.elements.whatsapp_no.value)||null,email_id:f.elements.email_id.value.trim()||null,location:f.elements.location.value.trim()||null,state:matchedState||null};"
-          if old not in s:
-              raise SystemExit('saveCallDetails target not found')
-          s=s.replace(old,new,1)
+          old="async function loadCalling(){const mode=$('#callQueueFilter')?.value||'pending'"
+          new="async function loadCalling(){if(!Array.isArray(S.callStateOptions))await loadAllCallStates();const mode=$('#callQueueFilter')?.value||'pending'"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
+              raise SystemExit('loadCalling target not found')
 
-          old="$('#callDetailsForm').addEventListener('input',e=>{e.target.classList?.remove('field-invalid');if(S.callDetailsUpdatedId===x.id)S.callDetailsUpdatedId=null;syncCallButtons()});"
-          new="$('#callDetailsForm').addEventListener('input',e=>{e.target.classList?.remove('field-invalid');if(S.callDetailsUpdatedId===x.id)S.callDetailsUpdatedId=null;syncCallButtons()});const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))],m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
-          if old not in s:
-              raise SystemExit('callDetails input listener target not found')
-          s=s.replace(old,new,1)
+          old="${[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value=\"${attr(v)}\"></option>`).join('')}"
+          new="${(S.callStateOptions||[]).map(v=>`<option value=\"${attr(v)}\"></option>`).join('')}"
+          if old in s:
+              s=s.replace(old,new,1)
+
+          old="knownStates=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))]"
+          new="knownStates=(S.callStateOptions||[])"
+          if old in s:
+              s=s.replace(old,new,1)
+
+          old="const known=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))]"
+          new="const known=(S.callStateOptions||[])"
+          if old in s:
+              s=s.replace(old,new,1)
 
           p.write_text(s,encoding='utf-8')
           PY
@@ -45,5 +57,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Allow staff to edit location and pick searchable existing state'
+          git commit -m 'Show all admin states in staff calling state search'
           git push
