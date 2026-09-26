@@ -1,4 +1,5 @@
 name: Mobile Final CRM Polish
+# retrigger after workflow registration
 on:
   push:
     paths:
@@ -34,36 +35,24 @@ jobs:
   .toolbar,.filters,.management-tools,.action-row{max-width:100%!important;min-width:0!important}
   input,select,textarea,button,.btn{max-width:100%!important;box-sizing:border-box!important}
   input,select,textarea{font-size:14px!important}
-
-  /* Calling main tabs */
   #callingPage .call-page-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;width:100%!important;padding:3px!important;margin:7px 0 9px!important;border:1px solid #dce5ef!important;border-radius:10px!important;background:#f2f6fb!important;overflow:visible!important}
   #callingPage .call-page-tab{width:100%!important;min-width:0!important;min-height:38px!important;padding:7px 2px!important;border:0!important;border-radius:8px!important;font-size:11px!important;font-weight:700!important;line-height:1.15!important;text-align:center!important;white-space:normal!important;color:#52667b!important;background:transparent!important}
   #callingPage .call-page-tab.active{background:#2f6de5!important;color:#fff!important;box-shadow:0 2px 7px #2f6de52b!important}
-
-  /* Calling queue filter */
   #callingPage .call-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;width:100%!important;margin:0!important;padding:8px!important;align-items:center!important}
   #callingPage .call-toolbar select{width:100%!important;min-width:0!important;min-height:36px!important;height:36px!important;padding:5px 7px!important;font-size:12px!important}
   #callingPage .call-toolbar button{min-height:36px!important;height:36px!important;padding:5px 10px!important;font-size:12px!important}
   #callingPage #callQueueInfo{grid-column:1/-1!important;text-align:right!important;font-size:11px!important;margin:0!important}
-
-  /* Status / history date filters must fit screen */
   #callingPage .status-date-filter,#callingPage .report-filters,#callingPage .history-tools,#callingPage .history-date-filter{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;align-items:end!important;padding:8px!important}
   #callingPage .status-date-filter>* ,#callingPage .report-filters>* ,#callingPage .history-tools>* ,#callingPage .history-date-filter>*{min-width:0!important;max-width:100%!important;width:100%!important;margin:0!important}
   #callingPage .status-date-filter input,#callingPage .status-date-filter select,#callingPage .report-filters input,#callingPage .report-filters select,#callingPage .history-tools input,#callingPage .history-tools select,#callingPage .history-date-filter input,#callingPage .history-date-filter select{width:100%!important;min-width:0!important;height:38px!important;min-height:38px!important;padding:6px 7px!important;font-size:12px!important}
   #callingPage .status-date-filter button,#callingPage .report-filters button,#callingPage .history-tools button,#callingPage .history-date-filter button{width:100%!important;min-width:0!important;min-height:38px!important;padding:6px 8px!important;font-size:12px!important}
   #callingPage .history-status-filter,#callingPage #callingHistoryCount{grid-column:1/-1!important}
-
-  /* Status KPI cards */
   #callingPage .stats,#callingPage .status-stats,#callingPage .status-summary,#callingPage .call-summary,#callingPage .quick-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important}
   #callingPage .stat,#callingPage .quick,#callingPage .status-card,#callingPage .summary-card{min-width:0!important;min-height:82px!important;padding:12px!important;margin:0!important;border-radius:10px!important}
   #callingPage .stat b,#callingPage .quick em,#callingPage .status-card b,#callingPage .summary-card b{font-size:22px!important;line-height:1.1!important}
   #callingPage .stat span,#callingPage .quick span,#callingPage .status-card span,#callingPage .summary-card span{font-size:12px!important;line-height:1.2!important}
-
-  /* Follow Up sub tabs */
   #callingPage .follow-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;width:100%!important;margin:5px 0 8px!important}
   #callingPage .follow-tabs .btn{width:100%!important;min-width:0!important;min-height:38px!important;padding:6px 4px!important;font-size:11px!important;white-space:normal!important}
-
-  /* Forms / current calling record */
   #callingPage .call-title{grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important}
   #callingPage .call-title input,#callingPage .call-name-input{width:100%!important;min-width:0!important;font-size:17px!important;padding:8px!important}
   #callingPage .call-meta,#callingPage .call-form{grid-template-columns:1fr!important;gap:6px!important}
@@ -73,14 +62,10 @@ jobs:
   #callingPage .call-inline-quick{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important}
   #callingPage .call-log-actions{display:grid!important;grid-template-columns:64px minmax(0,1fr) 64px!important;gap:5px!important;width:100%!important}
   #callingPage .call-log-actions .btn{min-width:0!important;width:100%!important;padding:6px 2px!important;font-size:10px!important;white-space:normal!important}
-
-  /* Tables: never force whole page wider; scroll inside card */
   .table-wrap,.institute-grid-wrap,.previous-call-table-wrap{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;border-radius:9px!important}
   #callingPage .call-history-table,#callingPage .follow-table,#callingPage .previous-call-table{min-width:720px!important;font-size:11px!important}
   .institute-data-table{min-width:900px!important;font-size:11px!important}
   table th,table td{padding:7px!important}
-
-  /* Generic mobile CRM pages */
   .stats,.master-stats,.quick-grid,.staff-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
   .management-tools .filters,.filters{grid-template-columns:1fr!important;gap:6px!important}
   .management-tools{padding:8px!important}
