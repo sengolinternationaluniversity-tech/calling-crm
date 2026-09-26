@@ -1,4 +1,4 @@
-name: Searchable Blank State In Staff Calling
+name: Search Inside State Dropdown In Staff Calling
 on:
   push:
     paths:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Make blank state searchable with existing admin states
+      - name: Put search box inside blank state dropdown
         shell: bash
         run: |
           python3 <<'PY'
@@ -19,14 +19,14 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
 
-          old='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<select name="state"><option value="">Select State</option>${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}">${esc(v)}</option>`).join(\'\')}</select>`}</div>'
-          new='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<input name="state" list="callStateList" value="" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist>`}</div>'
+          old='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<input name="state" list="callStateList" value="" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist>`}</div>'
+          new='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<div id="callStatePicker" style="position:relative"><input name="state" type="hidden" value=""><button id="callStateDropdownBtn" type="button" style="width:100%;height:38px;border:1px solid #c7d5e7;border-radius:7px;background:#fff;padding:0 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer"><span id="callStateDropdownLabel">Select State</span><span>⌄</span></button><div id="callStateDropdownMenu" style="display:none;position:absolute;z-index:50;left:0;right:0;top:42px;background:#fff;border:1px solid #c7d5e7;border-radius:8px;box-shadow:0 8px 24px #10243c26;padding:8px"><input id="callStateSearch" type="text" placeholder="Search state..." autocomplete="off" style="width:100%;height:36px;margin-bottom:7px"><div id="callStateOptions" style="max-height:210px;overflow:auto">${(S.callStateOptions||[]).map(v=>`<button type="button" class="call-state-option" data-state="${attr(v)}" style="display:block;width:100%;border:0;background:#fff;text-align:left;padding:9px 10px;border-radius:6px;cursor:pointer">${esc(v)}</button>`).join(\'\')}</div></div></div>`}</div>'
           if old not in s:
-              raise SystemExit('blank state dropdown target not found')
+              raise SystemExit('searchable state input target not found')
           s=s.replace(old,new,1)
 
-          old="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{stateInput.classList?.remove('field-invalid')});"
-          new="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('input',()=>{stateInput.classList?.remove('field-invalid')});if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
+          old="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('input',()=>{stateInput.classList?.remove('field-invalid')});if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
+          new="const stateInput=$('#callDetailsForm').elements.state;const stateDropBtn=$('#callStateDropdownBtn'),stateMenu=$('#callStateDropdownMenu'),stateSearch=$('#callStateSearch'),stateLabel=$('#callStateDropdownLabel'),stateOptions=$$('#callStateOptions .call-state-option');if(stateDropBtn&&stateMenu){stateDropBtn.onclick=()=>{const open=stateMenu.style.display==='block';stateMenu.style.display=open?'none':'block';if(!open)setTimeout(()=>stateSearch?.focus(),0)}}if(stateSearch)stateSearch.oninput=()=>{const q=String(stateSearch.value||'').trim().toLowerCase();stateOptions.forEach(b=>{b.style.display=!q||String(b.dataset.state||'').toLowerCase().includes(q)?'block':'none'})};stateOptions.forEach(b=>b.onclick=()=>{const v=b.dataset.state||'';if(stateInput)stateInput.value=v;if(stateLabel)stateLabel.textContent=v;if(stateMenu)stateMenu.style.display='none';stateInput?.classList?.remove('field-invalid')});"
           if old not in s:
               raise SystemExit('state listener target not found')
           s=s.replace(old,new,1)
@@ -39,5 +39,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Add searchable existing-state picker for blank staff records'
+          git commit -m 'Put state search inside dropdown for blank staff records'
           git push
