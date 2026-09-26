@@ -1,0 +1,29 @@
+name: Require Mobile In Import
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/require-mobile-import.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker="const source=XLSX.utils.sheet_to_json(sheet,{defval:''});if(!source.length){$('#importMsg').textContent='File में data नहीं मिला।';return}"
+          if marker not in s:
+              raise SystemExit('Import source marker not found')
+          insert="""const source=XLSX.utils.sheet_to_json(sheet,{defval:''});if(!source.length){$('#importMsg').textContent='File में data नहीं मिला।';return}const normImportKey=k=>String(k||'').trim().toLowerCase().replace(/[._-]+/g,' ').replace(/\\s+/g,' ');const mobileKeys=new Set(['mobile no','mobile number','mobile','phone','phone no','phone number','contact no','contact number']);const missingMobileRows=[];source.forEach((row,i)=>{const hasMobile=Object.entries(row||{}).some(([k,v])=>mobileKeys.has(normImportKey(k))&&String(v??'').trim());if(!hasMobile)missingMobileRows.push(i+2)});if(missingMobileRows.length){$('#importMsg').textContent=`Mobile No. mandatory hai. Row ${missingMobileRows.slice(0,15).join(', ')}${missingMobileRows.length>15?'...':''} mein Mobile No. missing hai.`;return}"""
+          s=s.replace(marker,insert,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add index.html
+          git commit -m 'Make mobile number mandatory for Excel import'
+          git push
