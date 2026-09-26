@@ -1,0 +1,29 @@
+name: Style Invalid Follow-up
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/style-invalid-followup.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old=".call-meta input.field-invalid{border:2px solid #dc3345!important;background:#fff1f2!important;box-shadow:0 0 0 3px #dc334522}.call-meta input.field-invalid::placeholder{color:#b4232c}"
+          new=".call-meta input.field-invalid,.call-form input.field-invalid{border:2px solid #ef334f!important;background:#fff1f2!important;box-shadow:0 0 0 3px #ef334f22!important}.call-meta input.field-invalid::placeholder,.call-form input.field-invalid::placeholder{color:#d61f3c!important}.call-form input.field-invalid:focus{outline:none!important;border:2px solid #ef334f!important;box-shadow:0 0 0 3px #ef334f2b!important;background:#fff1f2!important}"
+          if old not in s:
+              raise SystemExit('Expected field-invalid CSS marker not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add index.html
+          git commit -m 'Highlight invalid follow-up date in red'
+          git push
