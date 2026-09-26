@@ -1,4 +1,4 @@
-name: Sync All Admin States To Staff Calling
+name: Blank State Edit Only In Staff Calling
 on:
   push:
     paths:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch staff state source
+      - name: Limit state edit to blank records
         shell: bash
         run: |
           python3 <<'PY'
@@ -19,35 +19,17 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
 
-          marker="async function loadAllCallStates(){"
-          if marker not in s:
-              anchor="function callQuery(){"
-              if anchor not in s:
-                  raise SystemExit('callQuery anchor not found')
-              fn="async function loadAllCallStates(){const {data,error}=await db.from('crm_state_options').select('state').order('state',{ascending:true});if(error){toast('State list load nahi hui: '+error.message);S.callStateOptions=[];return}S.callStateOptions=[...new Set((data||[]).map(x=>String(x.state||'').trim()).filter(Boolean))]}\n"
-              s=s.replace(anchor,fn+anchor,1)
+          old='<div><small>State</small><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
+          new='<div><small>State</small><div style="display:flex;gap:7px;align-items:center"><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="${String(x.state||\'\').trim()?\'State\':\'State blank hai\'}" autocomplete="off" readonly aria-readonly="true" style="flex:1">${String(x.state||\'\').trim()?\'\':\'<button id="callStateEditBtn" type="button" class="btn secondary" style="white-space:nowrap">Edit</button>\'}</div><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
+          if old not in s:
+              raise SystemExit('state field target not found')
+          s=s.replace(old,new,1)
 
-          old="async function loadCalling(){const mode=$('#callQueueFilter')?.value||'pending'"
-          new="async function loadCalling(){if(!Array.isArray(S.callStateOptions))await loadAllCallStates();const mode=$('#callQueueFilter')?.value||'pending'"
-          if old in s:
-              s=s.replace(old,new,1)
-          elif new not in s:
-              raise SystemExit('loadCalling target not found')
-
-          old="${[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value=\"${attr(v)}\"></option>`).join('')}"
-          new="${(S.callStateOptions||[]).map(v=>`<option value=\"${attr(v)}\"></option>`).join('')}"
-          if old in s:
-              s=s.replace(old,new,1)
-
-          old="knownStates=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))]"
-          new="knownStates=(S.callStateOptions||[])"
-          if old in s:
-              s=s.replace(old,new,1)
-
-          old="const known=[...new Set((S.masterRows||[]).map(r=>String(r.state||'').trim()).filter(Boolean))]"
-          new="const known=(S.callStateOptions||[])"
-          if old in s:
-              s=s.replace(old,new,1)
+          old="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
+          new="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});const stateEditBtn=$('#callStateEditBtn');if(stateEditBtn&&stateInput)stateEditBtn.onclick=()=>{stateInput.readOnly=false;stateInput.removeAttribute('aria-readonly');stateInput.focus();stateEditBtn.disabled=true;stateEditBtn.textContent='Select State'};"
+          if old not in s:
+              raise SystemExit('state listener target not found')
+          s=s.replace(old,new,1)
 
           p.write_text(s,encoding='utf-8')
           PY
@@ -57,5 +39,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Show all admin states in staff calling state search'
+          git commit -m 'Show state Edit button only for blank staff calling records'
           git push
