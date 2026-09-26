@@ -19,3 +19,5 @@ Open `dist/index.html` in a browser, or serve the `dist` folder with any static 
 3. Never put the Supabase service-role key in browser code. Only the public anon key may be used client-side.
 
 The current frontend uses sample data so it can be previewed immediately. The included SQL defines the production-ready data structure for the next integration step.
+
+<!-- redeploy-trigger: restore-known-working-login -->
