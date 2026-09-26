@@ -1,4 +1,4 @@
-name: Search Inside State Dropdown In Staff Calling
+name: Searchable State Dropdown In Staff Calling
 on:
   push:
     paths:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Put search box inside blank state dropdown
+      - name: Build program-style searchable state dropdown
         shell: bash
         run: |
           python3 <<'PY'
@@ -19,17 +19,27 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
 
-          old='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<input name="state" list="callStateList" value="" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist>`}</div>'
-          new='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<div id="callStatePicker" style="position:relative"><input name="state" type="hidden" value=""><button id="callStateDropdownBtn" type="button" style="width:100%;height:38px;border:1px solid #c7d5e7;border-radius:7px;background:#fff;padding:0 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer"><span id="callStateDropdownLabel">Select State</span><span>⌄</span></button><div id="callStateDropdownMenu" style="display:none;position:absolute;z-index:50;left:0;right:0;top:42px;background:#fff;border:1px solid #c7d5e7;border-radius:8px;box-shadow:0 8px 24px #10243c26;padding:8px"><input id="callStateSearch" type="text" placeholder="Search state..." autocomplete="off" style="width:100%;height:36px;margin-bottom:7px"><div id="callStateOptions" style="max-height:210px;overflow:auto">${(S.callStateOptions||[]).map(v=>`<button type="button" class="call-state-option" data-state="${attr(v)}" style="display:block;width:100%;border:0;background:#fff;text-align:left;padding:9px 10px;border-radius:6px;cursor:pointer">${esc(v)}</button>`).join(\'\')}</div></div></div>`}</div>'
-          if old not in s:
-              raise SystemExit('searchable state input target not found')
-          s=s.replace(old,new,1)
+          old_custom='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<div id="callStatePicker" style="position:relative"><input name="state" type="hidden" value=""><button id="callStateDropdownBtn" type="button" style="width:100%;height:38px;border:1px solid #c7d5e7;border-radius:7px;background:#fff;padding:0 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer"><span id="callStateDropdownLabel">Select State</span><span>⌄</span></button><div id="callStateDropdownMenu" style="display:none;position:absolute;z-index:50;left:0;right:0;top:42px;background:#fff;border:1px solid #c7d5e7;border-radius:8px;box-shadow:0 8px 24px #10243c26;padding:8px"><input id="callStateSearch" type="text" placeholder="Search state..." autocomplete="off" style="width:100%;height:36px;margin-bottom:7px"><div id="callStateOptions" style="max-height:210px;overflow:auto">${(S.callStateOptions||[]).map(v=>`<button type="button" class="call-state-option" data-state="${attr(v)}" style="display:block;width:100%;border:0;background:#fff;text-align:left;padding:9px 10px;border-radius:6px;cursor:pointer">${esc(v)}</button>`).join(\'\')}</div></div></div>`}</div>'
+          old_datalist='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<input name="state" list="callStateList" value="" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist>`}</div>'
+          new='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<div id="callStatePicker" style="position:relative"><input name="state" type="hidden" value=""><button id="callStateDropdownBtn" type="button" style="width:100%;height:40px;border:1px solid #c7d5e7;border-radius:8px;background:#fff;padding:0 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:#6b7280"><span id="callStateDropdownLabel">Select State</span><span style="font-size:16px">⌃</span></button><div id="callStateDropdownMenu" style="display:none;position:absolute;z-index:80;left:0;right:0;top:45px;background:#fff;border:1px solid #d6dde8;border-radius:10px;box-shadow:0 10px 28px #10243c24;overflow:hidden"><div style="padding:8px"><input id="callStateSearch" type="text" placeholder="Search..." autocomplete="off" style="width:100%;height:36px;border:1px solid #d3dbe7;border-radius:7px;padding:0 10px;outline:none"></div><div style="padding:7px 12px;background:#f8f4f1;font-weight:700;color:#a5451c">Select State</div><div id="callStateOptions" style="max-height:225px;overflow:auto;padding:4px 0">${(S.callStateOptions||[]).map(v=>`<button type="button" class="call-state-option" data-state="${attr(v)}" style="display:block;width:100%;border:0;background:#fff;text-align:left;padding:10px 13px;cursor:pointer;color:#475569">${esc(v)}</button>`).join(\'\')}</div></div></div>`}</div>'
 
-          old="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('input',()=>{stateInput.classList?.remove('field-invalid')});if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
-          new="const stateInput=$('#callDetailsForm').elements.state;const stateDropBtn=$('#callStateDropdownBtn'),stateMenu=$('#callStateDropdownMenu'),stateSearch=$('#callStateSearch'),stateLabel=$('#callStateDropdownLabel'),stateOptions=$$('#callStateOptions .call-state-option');if(stateDropBtn&&stateMenu){stateDropBtn.onclick=()=>{const open=stateMenu.style.display==='block';stateMenu.style.display=open?'none':'block';if(!open)setTimeout(()=>stateSearch?.focus(),0)}}if(stateSearch)stateSearch.oninput=()=>{const q=String(stateSearch.value||'').trim().toLowerCase();stateOptions.forEach(b=>{b.style.display=!q||String(b.dataset.state||'').toLowerCase().includes(q)?'block':'none'})};stateOptions.forEach(b=>b.onclick=()=>{const v=b.dataset.state||'';if(stateInput)stateInput.value=v;if(stateLabel)stateLabel.textContent=v;if(stateMenu)stateMenu.style.display='none';stateInput?.classList?.remove('field-invalid')});"
-          if old not in s:
-              raise SystemExit('state listener target not found')
-          s=s.replace(old,new,1)
+          if old_custom in s:
+              s=s.replace(old_custom,new,1)
+          elif old_datalist in s:
+              s=s.replace(old_datalist,new,1)
+          elif 'id="callStatePicker"' not in s:
+              raise SystemExit('state picker target not found')
+
+          old_listener="const stateInput=$('#callDetailsForm').elements.state;const stateDropBtn=$('#callStateDropdownBtn'),stateMenu=$('#callStateDropdownMenu'),stateSearch=$('#callStateSearch'),stateLabel=$('#callStateDropdownLabel'),stateOptions=$$('#callStateOptions .call-state-option');if(stateDropBtn&&stateMenu){stateDropBtn.onclick=()=>{const open=stateMenu.style.display==='block';stateMenu.style.display=open?'none':'block';if(!open)setTimeout(()=>stateSearch?.focus(),0)}}if(stateSearch)stateSearch.oninput=()=>{const q=String(stateSearch.value||'').trim().toLowerCase();stateOptions.forEach(b=>{b.style.display=!q||String(b.dataset.state||'').toLowerCase().includes(q)?'block':'none'})};stateOptions.forEach(b=>b.onclick=()=>{const v=b.dataset.state||'';if(stateInput)stateInput.value=v;if(stateLabel)stateLabel.textContent=v;if(stateMenu)stateMenu.style.display='none';stateInput?.classList?.remove('field-invalid')});"
+          old_listener2="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('input',()=>{stateInput.classList?.remove('field-invalid')});if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
+          new_listener="const stateInput=$('#callDetailsForm').elements.state;const stateDropBtn=$('#callStateDropdownBtn'),stateMenu=$('#callStateDropdownMenu'),stateSearch=$('#callStateSearch'),stateLabel=$('#callStateDropdownLabel'),stateOptions=$$('#callStateOptions .call-state-option');if(stateDropBtn&&stateMenu){stateDropBtn.onclick=e=>{e.stopPropagation();const open=stateMenu.style.display==='block';stateMenu.style.display=open?'none':'block';const arrow=stateDropBtn.querySelector('span:last-child');if(arrow)arrow.textContent=open?'⌄':'⌃';if(!open){if(stateSearch)stateSearch.value='';stateOptions.forEach(b=>b.style.display='block');setTimeout(()=>stateSearch?.focus(),0)}}}if(stateSearch){stateSearch.onclick=e=>e.stopPropagation();stateSearch.oninput=()=>{const q=String(stateSearch.value||'').trim().toLowerCase();stateOptions.forEach(b=>{b.style.display=!q||String(b.dataset.state||'').toLowerCase().includes(q)?'block':'none'})}}stateOptions.forEach(b=>{b.onmouseenter=()=>b.style.background='#f5f7fb';b.onmouseleave=()=>b.style.background='#fff';b.onclick=e=>{e.stopPropagation();const v=b.dataset.state||'';if(stateInput)stateInput.value=v;if(stateLabel){stateLabel.textContent=v;stateLabel.style.color='#111827'}if(stateMenu)stateMenu.style.display='none';const arrow=stateDropBtn?.querySelector('span:last-child');if(arrow)arrow.textContent='⌄';stateInput?.classList?.remove('field-invalid')}});if(stateMenu)stateMenu.onclick=e=>e.stopPropagation();document.addEventListener('click',()=>{if(stateMenu)stateMenu.style.display='none';const arrow=stateDropBtn?.querySelector('span:last-child');if(arrow)arrow.textContent='⌄'});"
+
+          if old_listener in s:
+              s=s.replace(old_listener,new_listener,1)
+          elif old_listener2 in s:
+              s=s.replace(old_listener2,new_listener,1)
+          elif 'stateDropBtn' not in s:
+              raise SystemExit('state dropdown listener target not found')
 
           p.write_text(s,encoding='utf-8')
           PY
@@ -39,5 +49,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Put state search inside dropdown for blank staff records'
+          git commit -m 'Match searchable state dropdown to requested UI'
           git push
