@@ -1,0 +1,50 @@
+name: Add Calling Next Button
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/add-calling-next-button.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      - name: Patch calling screen
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old_css = "#callSaveNextBtn{min-height:34px;padding:7px 12px;line-height:1.15}.call-form button:disabled{opacity:.5;cursor:not-allowed;background:#7f918a}"
+          new_css = "#callSaveNextBtn{min-height:34px;padding:7px 12px;line-height:1.15}.call-log-actions{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}.call-log-actions #callSaveNextBtn{width:100%}#callNextBtn{min-width:110px;min-height:34px;padding:7px 16px;white-space:nowrap}.call-form button:disabled{opacity:.5;cursor:not-allowed;background:#7f918a}@media(max-width:680px){.call-log-actions{grid-template-columns:1fr}.call-log-actions #callNextBtn{width:100%}}"
+          if old_css not in s:
+              raise SystemExit('Expected calling CSS marker not found')
+          s = s.replace(old_css, new_css, 1)
+
+          old_button = '<button id="callSaveNextBtn" class="btn primary wide" type="submit">Save Status & Next</button></form><details id="previousCallHistory"'
+          new_button = '<div class="call-log-actions"><button id="callSaveNextBtn" class="btn primary" type="submit">Save Status & Next</button><button id="callNextBtn" class="btn secondary" type="button"${S.callIndex>=S.callRows.length-1?\' disabled\':\'\'}>Next →</button></div></form><details id="previousCallHistory"'
+          if old_button not in s:
+              raise SystemExit('Expected Save Status button marker not found')
+          s = s.replace(old_button, new_button, 1)
+
+          old_bind = "$('#callLogForm').onsubmit=saveCallAndNext;$('#callLogForm').elements.status.addEventListener('change',syncCallButtons);syncCallButtons();"
+          new_bind = "$('#callLogForm').onsubmit=saveCallAndNext;const callNextBtn=$('#callNextBtn');if(callNextBtn)callNextBtn.onclick=()=>{if(S.callIndex>=S.callRows.length-1){toast('Last record hai');return}S.callIndex++;renderCallRecord();$('#callRecord')?.scrollIntoView({behavior:'smooth',block:'start'})};$('#callLogForm').elements.status.addEventListener('change',syncCallButtons);syncCallButtons();"
+          if old_bind not in s:
+              raise SystemExit('Expected call form binding marker not found')
+          s = s.replace(old_bind, new_bind, 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Add Next button to calling queue"
+          git push
