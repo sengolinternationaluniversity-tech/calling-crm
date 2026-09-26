@@ -1,4 +1,4 @@
-name: Blank State Edit Only In Staff Calling
+name: Blank State Select In Staff Calling
 on:
   push:
     paths:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Limit state edit to blank records
+      - name: Replace blank state editor with clean dropdown
         shell: bash
         run: |
           python3 <<'PY'
@@ -19,14 +19,14 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
 
-          old='<div><small>State</small><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="State search karein" autocomplete="off"><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
-          new='<div><small>State</small><div style="display:flex;gap:7px;align-items:center"><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="${String(x.state||\'\').trim()?\'State\':\'State blank hai\'}" autocomplete="off" readonly aria-readonly="true" style="flex:1">${String(x.state||\'\').trim()?\'\':\'<button id="callStateEditBtn" type="button" class="btn secondary" style="white-space:nowrap">Edit</button>\'}</div><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
+          old='<div><small>State</small><div style="display:flex;gap:7px;align-items:center"><input name="state" list="callStateList" value="${attr(x.state||\'\')}" placeholder="${String(x.state||\'\').trim()?\'State\':\'State blank hai\'}" autocomplete="off" readonly aria-readonly="true" style="flex:1">${String(x.state||\'\').trim()?\'\':\'<button id="callStateEditBtn" type="button" class="btn secondary" style="white-space:nowrap">Edit</button>\'}</div><datalist id="callStateList">${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}"></option>`).join(\'\')}</datalist></div>'
+          new='<div><small>State</small>${String(x.state||\'\').trim()?`<input name="state" value="${attr(x.state||\'\')}" readonly aria-readonly="true">`:`<select name="state"><option value="">Select State</option>${(S.callStateOptions||[]).map(v=>`<option value="${attr(v)}">${esc(v)}</option>`).join(\'\')}</select>`}</div>'
           if old not in s:
-              raise SystemExit('state field target not found')
+              raise SystemExit('current state editor target not found')
           s=s.replace(old,new,1)
 
-          old="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});"
-          new="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});const stateEditBtn=$('#callStateEditBtn');if(stateEditBtn&&stateInput)stateEditBtn.onclick=()=>{stateInput.readOnly=false;stateInput.removeAttribute('aria-readonly');stateInput.focus();stateEditBtn.disabled=true;stateEditBtn.textContent='Select State'};"
+          old="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{const known=(S.callStateOptions||[]),m=known.find(v=>v.toLowerCase()===String(stateInput.value||'').trim().toLowerCase());if(m)stateInput.value=m});const stateEditBtn=$('#callStateEditBtn');if(stateEditBtn&&stateInput)stateEditBtn.onclick=()=>{stateInput.readOnly=false;stateInput.removeAttribute('aria-readonly');stateInput.focus();stateEditBtn.disabled=true;stateEditBtn.textContent='Select State'};"
+          new="const stateInput=$('#callDetailsForm').elements.state;if(stateInput)stateInput.addEventListener('change',()=>{stateInput.classList?.remove('field-invalid')});"
           if old not in s:
               raise SystemExit('state listener target not found')
           s=s.replace(old,new,1)
@@ -39,5 +39,5 @@ jobs:
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Show state Edit button only for blank staff calling records'
+          git commit -m 'Use clean existing-state dropdown for blank staff records'
           git push
