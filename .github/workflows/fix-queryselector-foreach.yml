@@ -1,0 +1,29 @@
+name: Fix QuerySelector ForEach
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/fix-queryselector-foreach.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="$('.row-select').forEach(x=>x.checked=S.selectAllFiltered);"
+          new="$$('.row-select').forEach(x=>x.checked=S.selectAllFiltered);"
+          if old not in s:
+              raise SystemExit('target selector bug not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add index.html
+          git commit -m 'Fix NodeList iteration selector bug'
+          git push
