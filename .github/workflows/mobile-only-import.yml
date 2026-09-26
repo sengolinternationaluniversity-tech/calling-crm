@@ -1,0 +1,39 @@
+name: Mobile Only Import Validation
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/mobile-only-import.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="const invalidRows=[];rows=rows.filter(r=>{let reason='';if(!r.institute_name)reason='Institute name missing';else if(r.mobile_no&&phones(r.mobile_no).some(n=>n.length<7||n.length>15))reason='Invalid mobile number';else if(r.email_id&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(r.email_id))reason='Invalid email address';if(reason){invalidRows.push({...r,duplicate_reason:reason});return false}return true});"
+          new="const invalidRows=[];rows=rows.filter(r=>{let reason='';if(r.mobile_no&&phones(r.mobile_no).some(n=>n.length<7||n.length>15))reason='Invalid mobile number';else if(r.email_id&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(r.email_id))reason='Invalid email address';if(reason){invalidRows.push({...r,duplicate_reason:reason});return false}return true});"
+          if old not in s:
+              raise SystemExit('Import validation block not found')
+          s=s.replace(old,new,1)
+          old2="for(const r of rows){const key=normName(r.institute_name);if(!grouped.has(key))grouped.set(key,r);else{duplicateRows.push({...r,duplicate_reason:'Same institute merged within uploaded file'});const g=grouped.get(key);g.mobile_no=mergePhones(g.mobile_no,r.mobile_no);for(const k of Object.keys(r))if(!g[k]&&r[k])g[k]=r[k]}}rows=[...grouped.values()];"
+          new2="for(const [i,r] of rows.entries()){const key=r.institute_name?('name:'+normName(r.institute_name)):('row:'+i);if(!grouped.has(key))grouped.set(key,r);else{duplicateRows.push({...r,duplicate_reason:'Same institute merged within uploaded file'});const g=grouped.get(key);g.mobile_no=mergePhones(g.mobile_no,r.mobile_no);for(const k of Object.keys(r))if(!g[k]&&r[k])g[k]=r[k]}}rows=[...grouped.values()];"
+          if old2 not in s:
+              raise SystemExit('Uploaded-file grouping block not found')
+          s=s.replace(old2,new2,1)
+          old3="for(const r of rows){const old=byName.get(normName(r.institute_name));if(old){"
+          new3="for(const r of rows){const old=r.institute_name?byName.get(normName(r.institute_name)):null;if(old){"
+          if old3 not in s:
+              raise SystemExit('Existing-name lookup block not found')
+          s=s.replace(old3,new3,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add index.html
+          git commit -m 'Make only mobile number mandatory for import'
+          git push
