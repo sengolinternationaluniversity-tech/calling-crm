@@ -1,4 +1,4 @@
-name: Fix QuerySelector ForEach
+name: Add Calling Data Source Filter
 on:
   workflow_dispatch:
   push:
@@ -15,15 +15,35 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          old="$('.row-select').forEach(x=>x.checked=S.selectAllFiltered);"
-          new="$$('.row-select').forEach(x=>x.checked=S.selectAllFiltered);"
+
+          old='<div id="callingTabPanel" class="call-page-panel active"><div class="call-toolbar card"><select id="callStaffFilter" class="admin-only"><option value="">All assigned staff</option></select><select id="callQueueFilter">'
+          new='<div id="callingTabPanel" class="call-page-panel active"><div class="call-toolbar card"><select id="callStaffFilter" class="admin-only"><option value="">All assigned staff</option></select><select id="callSourceFilter"><option value="">All Data Sources</option></select><select id="callQueueFilter">'
           if old not in s:
-              raise SystemExit('target selector bug not found')
+              raise SystemExit('calling toolbar target not found')
           s=s.replace(old,new,1)
+
+          old="function callQuery(){let q=db.from('crm_institute_call_state').select('*',{count:'exact'}).order('serial_no',{ascending:true});if(isAdmin()){const staff=$('#callStaffFilter')?.value;if(staff)q=q.eq('assigned_to',staff);else q=q.not('assigned_to','is',null)}const mode=$('#callQueueFilter')?.value||'pending';if(mode==='pending')q=q.is('last_status',null);if(mode.startsWith('status:'))q=q.eq('last_status',mode.slice(7));return q}"
+          new="function callQuery(){let q=db.from('crm_institute_call_state').select('*',{count:'exact'}).order('serial_no',{ascending:true});if(isAdmin()){const staff=$('#callStaffFilter')?.value;if(staff)q=q.eq('assigned_to',staff);else q=q.not('assigned_to','is',null)}const source=$('#callSourceFilter')?.value||'';if(source)q=q.eq('data_source',source);const mode=$('#callQueueFilter')?.value||'pending';if(mode==='pending')q=q.is('last_status',null);if(mode.startsWith('status:'))q=q.eq('last_status',mode.slice(7));return q}"
+          if old not in s:
+              raise SystemExit('callQuery target not found')
+          s=s.replace(old,new,1)
+
+          old="$('#refreshCalling').onclick=loadCalling;$('#callQueueFilter').onchange=loadCalling;$('#callStaffFilter').onchange=loadCalling;$$('[data-follow-mode]').forEach(b=>b.onclick=()=>loadFollowups(b.dataset.followMode));"
+          new="$('#refreshCalling').onclick=loadCalling;$('#callQueueFilter').onchange=loadCalling;$('#callStaffFilter').onchange=loadCalling;$('#callSourceFilter').onchange=loadCalling;$$('[data-follow-mode]').forEach(b=>b.onclick=()=>loadFollowups(b.dataset.followMode));"
+          if old not in s:
+              raise SystemExit('calling filter event target not found')
+          s=s.replace(old,new,1)
+
+          old="const states=vals('state'),locations=vals('location'),countries=vals('country'),sources=vals('data_source');$('#masterTotal').textContent=all.length.toLocaleString();$('#masterStates').textContent=states.length;$('#masterLocations').textContent=locations.length;$('#masterCountries').textContent=countries.length;$('#stateFilter').innerHTML='<option value=\"\">All States</option>'+states.map(x=>`<option>${esc(x)}</option>`).join('');$('#locationFilter').innerHTML='<option value=\"\">All Locations</option>'+locations.map(x=>`<option>${esc(x)}</option>`).join('');$('#sourceFilter').innerHTML='<option value=\"\">All Data Sources</option>'+sources.map(x=>`<option>${esc(x)}</option>`).join('')}"
+          new="const states=vals('state'),locations=vals('location'),countries=vals('country'),sources=vals('data_source');$('#masterTotal').textContent=all.length.toLocaleString();$('#masterStates').textContent=states.length;$('#masterLocations').textContent=locations.length;$('#masterCountries').textContent=countries.length;$('#stateFilter').innerHTML='<option value=\"\">All States</option>'+states.map(x=>`<option>${esc(x)}</option>`).join('');$('#locationFilter').innerHTML='<option value=\"\">All Locations</option>'+locations.map(x=>`<option>${esc(x)}</option>`).join('');$('#sourceFilter').innerHTML='<option value=\"\">All Data Sources</option>'+sources.map(x=>`<option>${esc(x)}</option>`).join('');const callSource=$('#callSourceFilter');if(callSource){const keep=callSource.value;callSource.innerHTML='<option value=\"\">All Data Sources</option>'+sources.map(x=>`<option value=\"${attr(x)}\">${esc(x)}</option>`).join('');if(sources.includes(keep))callSource.value=keep}}"
+          if old not in s:
+              raise SystemExit('loadMasterStats target not found')
+          s=s.replace(old,new,1)
+
           p.write_text(s,encoding='utf-8')
           PY
           git config user.name github-actions
           git config user.email actions@github.com
           git add index.html
-          git commit -m 'Fix NodeList iteration selector bug'
+          git commit -m 'Add Data Source filter to staff calling queue'
           git push
