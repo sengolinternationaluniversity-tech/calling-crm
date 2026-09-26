@@ -1,0 +1,15 @@
+name: Mobile Header Safe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mobile-header-safe.yml'
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo mobile-header-safe
